@@ -1,5 +1,6 @@
 import path from 'node:path'
 import react from '@vitejs/plugin-react'
+import AutoImport from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vite'
 import electron from 'vite-plugin-electron/simple'
 
@@ -25,6 +26,9 @@ export default defineConfig({
       // Ployfill the Electron and Node.js built-in modules for Renderer process.
       // See 👉 https://github.com/electron-vite/vite-plugin-electron-renderer
       renderer: {}
+    }),
+    AutoImport({
+      imports: ['react']
     })
   ]
 })
