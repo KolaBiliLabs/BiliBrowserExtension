@@ -28,7 +28,8 @@ export default defineConfig({
       renderer: {}
     }),
     AutoImport({
-      imports: ['react']
+      imports: ['react'],
+      dts: 'src/auto-imports.d.ts'
     })
   ]
 })
