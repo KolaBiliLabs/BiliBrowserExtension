@@ -86,7 +86,6 @@ export default defineBackground({
           const params = payload;
           console.log('后台脚本正在处理从 Popup 接收到的 URL 参数:', params);
 
-          // 1. 发送这些参数到 Electron 服务器
           if (socket && socket.connected) {
             sendDataToElectron('sendDataToElectron', params)
             sendResponse({ status: 'success', message: '参数已发送到 Electron 服务器。' });
@@ -103,6 +102,20 @@ export default defineBackground({
           sendResponse({ status: 'acknowledged', message: '收到其他事件。' });
           return true;
         }
+
+        case "checkConnection": {
+          const isConnected = socket?.connected
+          sendResponse({ status: 'success', message: '检测成功', data: { isConnected } })
+
+          if (!isConnected) {
+            socket?.connect()
+            if (socket?.connected) {
+              sendResponse({ status: 'success', message: '重连成功', data: { isConnected } })
+            }
+          }
+          return true
+        }
+
         default: {
           return false
         }

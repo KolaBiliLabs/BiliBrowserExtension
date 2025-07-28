@@ -2,6 +2,7 @@
 /**
  * todo: 重连机制
  */
+import CheckConnection from '@/components/CheckConnection.vue';
 import Provider from '@/components/Provider.vue';
 import { NButton, NCard, NSpace } from 'naive-ui';
 import { onMounted, ref } from 'vue';
@@ -41,7 +42,7 @@ const parseUrlParams = (url: string) => {
     });
     // 这里 /video/bvxxxx/ 最后一位为 ‘’
     const bvId = urlObj.pathname.split('/').at(-2)
-    if (!bvId || !bvId.startsWith('bv')) {
+    if (!bvId || !bvId.toLocaleLowerCase().startsWith('bv')) {
       window.$message.warning('请确认当前源为 bilibili 的视频播放页面')
       return
     }
@@ -96,6 +97,10 @@ onMounted(getUrl);
         content: true,
         footer: 'soft'
       }" size="small">
+
+      <template #header-extra>
+        <CheckConnection />
+      </template>
 
       <NSpace vertical :size="15">
         <NButton type="success" block class="mt-4" @click="send">

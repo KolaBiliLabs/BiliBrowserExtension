@@ -11,3 +11,9 @@ declare global {
     $notification: NotificationApiInjection
   }
 }
+
+interface SendMessageResponse<T = any> {
+  data: T
+  status: 'success' | 'error'
+  message: string
+}
