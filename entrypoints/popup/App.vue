@@ -104,7 +104,7 @@ onMounted(getUrl);
 
       <NSpace vertical :size="15">
         <NButton type="success" block class="mt-4" @click="send">
-          发送到客户端并添加到到播放列表
+          添加到播放列表
         </NButton>
       </NSpace>
     </NCard>

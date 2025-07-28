@@ -18,9 +18,9 @@ function connectSocketServer() {
   // 使用 io() 函数连接服务器
   socket = io(SOCKET_SERVER_URL, {
     // 可以在这里添加一些配置，例如超时时间、认证信息等
-    reconnection: true, // 允许自动重连
-    reconnectionAttempts: 5, // 尝试重连 5 次
-    reconnectionDelay: 1000, // 每次重连间隔 1 秒
+    reconnection: false, // 允许自动重连
+    // reconnectionAttempts: 5, // 尝试重连 5 次
+    // reconnectionDelay: 1000, // 每次重连间隔 1 秒
     transports: ['websocket', 'polling'] // 优先使用 WebSocket
   });
 

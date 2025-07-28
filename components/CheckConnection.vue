@@ -17,7 +17,7 @@ async function checkConnection() {
   isConnected.value = data.isConnected
 }
 
-function retry(fn: (...args: any[]) => void, times: number = 99, delay: number = 3000) {
+function retry(fn: (...args: any[]) => void, times: number = 5, delay: number = 3000) {
   const timer = setInterval(() => {
     fn()
     times--
@@ -49,6 +49,3 @@ onUnmounted(() => {
     </NTag>
   </div>
 </template>
-
-
-<style scoped></style>
