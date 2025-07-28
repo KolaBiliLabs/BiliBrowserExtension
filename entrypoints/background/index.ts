@@ -64,7 +64,7 @@ function connectSocketServer() {
   });
 
   // 监听 Electron 服务器发出的确认消息
-  socket.on('serverAck', (data: any) => {
+  socket.on('dataReceivedAck', (data) => {
     console.log('收到 Electron 服务器的确认:', data);
   });
 }
@@ -77,41 +77,36 @@ export default defineBackground({
     console.log('WXT 后台脚本正在启动...');
     connectSocketServer();
 
-    // **重点：监听来自 Popup 或 Content Script 的消息**
     // sendResponse 回调函数可以用来向发送者返回数据
-    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      console.log('后台脚本收到消息:', message);
-      console.log('消息发送者:', sender);
+    chrome.runtime.onMessage.addListener(({ type, payload }, _sender, sendResponse) => {
+      console.log('后台脚本收到消息: 消息类型为=> ', type);
 
-      // 检查消息类型，根据类型执行不同逻辑
-      if (message.type === 'sendParamsToBackground') {
-        const params = message.payload;
-        console.log('后台脚本正在处理从 Popup 接收到的 URL 参数:', params);
+      switch (type) {
+        case 'sendParamsToBackground': {
+          const params = payload;
+          console.log('后台脚本正在处理从 Popup 接收到的 URL 参数:', params);
 
-        // 在这里执行你真正需要进行的后续处理
-        // 例如：
-        // 1. 发送这些参数到 Electron 服务器
-        if (socket && socket.connected) {
-          socket.emit('sendDataToElectron', params); // 发送给 Electron 服务器
-          sendResponse({ status: 'success', message: '参数已发送到 Electron 服务器。' });
-        } else {
-          sendResponse({ status: 'error', message: 'Socket.IO 未连接，无法发送参数。' });
+          // 1. 发送这些参数到 Electron 服务器
+          if (socket && socket.connected) {
+            sendDataToElectron('sendDataToElectron', params)
+            sendResponse({ status: 'success', message: '参数已发送到 Electron 服务器。' });
+          } else {
+            sendResponse({ status: 'error', message: 'Socket.IO 未连接，无法发送参数。' });
+          }
+
+          // 必须返回 true 来指示你将异步地调用 sendResponse
+          return true;
         }
+        case 'OTHER_EVENT': {
 
-        // 必须返回 true 来指示你将异步地调用 sendResponse
-        return true;
+          console.log('收到其他事件:', payload);
+          sendResponse({ status: 'acknowledged', message: '收到其他事件。' });
+          return true;
+        }
+        default: {
+          return false
+        }
       }
-
-      // 你可以有其他类型的消息处理
-      if (message.type === 'OTHER_EVENT') {
-        console.log('收到其他事件:', message.payload);
-        sendResponse({ status: 'acknowledged', message: '收到其他事件。' });
-        return true;
-      }
-
-      // 对于未处理的消息，不返回任何东西或返回 false
-      // sendResponse 必须是同步调用或者返回 true
-      return false;
     });
   }
 });
