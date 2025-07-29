@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { GlobalThemeOverrides, lightTheme, NConfigProvider, NDialogProvider, NMessageProvider, NNotificationProvider, useDialog, useMessage, useNotification } from 'naive-ui';
+import { GlobalThemeOverrides, lightTheme, NConfigProvider, NMessageProvider, useMessage } from 'naive-ui';
 
 // 全局主题配置
 const themeOverrides: GlobalThemeOverrides = {
@@ -17,8 +17,6 @@ const themeOverrides: GlobalThemeOverrides = {
 const NaiveContentProvider = defineComponent({
   setup() {
     window.$message = useMessage()
-    window.$dialog = useDialog()
-    window.$notification = useNotification()
 
     return () => h('div', { class: 'main-tools' })
   },
@@ -27,13 +25,9 @@ const NaiveContentProvider = defineComponent({
 
 <template>
   <NConfigProvider :theme-overrides :theme="lightTheme">
-    <NMessageProvider :max="1" closable>
-      <NDialogProvider>
-        <NNotificationProvider>
-          <slot />
-          <NaiveContentProvider />
-        </NNotificationProvider>
-      </NDialogProvider>
+    <NMessageProvider :max="1" closable :duration="1000" placement="bottom">
+      <slot />
+      <NaiveContentProvider />
     </NMessageProvider>
   </NConfigProvider>
 </template>
