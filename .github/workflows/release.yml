@@ -25,7 +25,7 @@ jobs:
           cache: 'pnpm' # 启用 pnpm 依赖缓存，加快后续运行速度
 
       - name: Install dependencies # 步骤4: 安装项目依赖
-        run: pnpm install --frozen-lockfile # 使用 --frozen-lockfile 确保依赖安装的确定性
+        run: pnpm install # 使用 --frozen-lockfile 确保依赖安装的确定性
 
       - name: Build plugin # 步骤5: 构建你的 WXT 插件
         run: pnpm build # 这就是你提供的构建命令
@@ -51,11 +51,11 @@ jobs:
           zip -r ../${{ env.TAG_NAME }}.zip ./* # 将 dist 目录下的所有内容打包成 zip 文件，并放到项目根目录，以标签名命名
 
       - name: Upload Release Asset # 步骤9: 上传打包好的 zip 文件作为 Release 附件
-        uses: actions/upload-release-asset@v1 # 使用 actions/upload-release-asset Action 来上传附件
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # 从 'Create Release' 步骤获取上传 URL
-          asset_path: ./dist/${{ env.TAG_NAME }}.zip # **这是修改后的路径**：现在它指向我们刚刚打包的 zip 文件
-          asset_name: Cola-Bilibili-Helper-${{ env.TAG_NAME }}.zip # 附件的文件名，可以自定义为你的插件名
-          asset_content_type: application/zip # 附件类型
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{ env.TAG_NAME }}.zip # <-- 确保这里是 ./${{ env.TAG_NAME }}.zip
+          asset_name: Cola-Bilibili-Helper-${{ env.TAG_NAME }}.zip
+          asset_content_type: application/zip
