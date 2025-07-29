@@ -1,0 +1,61 @@
+name: Release Plugin # 工作流的名称，显示在 GitHub Actions 页面
+
+on:
+  push:
+    tags:
+      - 'v*' # 当你推送任何以 'v' 开头的标签时触发，例如 v1.0.0, v1.0.1
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest # 在最新的 Ubuntu 虚拟机上运行你的任务
+
+    steps:
+      - name: Checkout code # 步骤1: 检出你的 GitHub 仓库代码
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm # 步骤2: 设置 pnpm 环境
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8 # 假设你使用的是 pnpm 8，如果不同请修改
+
+      - name: Setup Node.js # 步骤3: 设置 Node.js 环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # 推荐使用 Node.js LTS 版本，例如 20
+          cache: 'pnpm' # 启用 pnpm 依赖缓存，加快后续运行速度
+
+      - name: Install dependencies # 步骤4: 安装项目依赖
+        run: pnpm install --frozen-lockfile # 使用 --frozen-lockfile 确保依赖安装的确定性
+
+      - name: Build plugin # 步骤5: 构建你的 WXT 插件
+        run: pnpm build # 这就是你提供的构建命令
+
+      - name: Get Tag Name # 步骤6: 从 Git 引用中提取标签名称
+        id: get_tag # 给这个步骤一个ID，方便后续引用它的输出
+        run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV # 将标签名设置为环境变量 TAG_NAME
+
+      - name: Create Release # 步骤7: 创建 GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v1 # 使用 softprops/action-gh-release Action 来创建 Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # 默认的 GitHub Actions Token，用于认证
+        with:
+          tag_name: ${{ env.TAG_NAME }} # 使用获取到的标签名作为 Release 的标签
+          name: Release ${{ env.TAG_NAME }} # Release 的标题
+          draft: false # 设置为 false，表示不是草稿发布
+          prerelease: false # 设置为 false，表示不是预发布版本
+
+      - name: Archive dist folder # 步骤8: 将 dist 文件夹打包成 zip 文件，因为 GitHub Release 附件通常是单个文件
+        run: |
+          cd dist # 进入 dist 目录
+          zip -r ../${{ env.TAG_NAME }}.zip ./* # 将 dist 目录下的所有内容打包成 zip 文件，并放到项目根目录，以标签名命名
+
+      - name: Upload Release Asset # 步骤9: 上传打包好的 zip 文件作为 Release 附件
+        uses: actions/upload-release-asset@v1 # 使用 actions/upload-release-asset Action 来上传附件
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # 从 'Create Release' 步骤获取上传 URL
+          asset_path: ./dist/${{ env.TAG_NAME }}.zip # **这是修改后的路径**：现在它指向我们刚刚打包的 zip 文件
+          asset_name: Cola-Bilibili-Helper-${{ env.TAG_NAME }}.zip # 附件的文件名，可以自定义为你的插件名
+          asset_content_type: application/zip # 附件类型
