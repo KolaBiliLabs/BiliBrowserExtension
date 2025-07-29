@@ -4,8 +4,11 @@ import Info from '@/components/Info.vue';
 import Provider from '@/components/Provider.vue';
 import SendToClient from '@/components/SendToClient.vue';
 import UnlinkView from '@/components/UnlinkView.vue';
-import { NCard } from 'naive-ui';
+import { useIsDev } from '@/hooks';
+import { NCard, NTag } from 'naive-ui';
 import { onMounted, ref } from 'vue';
+
+const { isDev } = useIsDev()
 
 const isConnected = ref(false)
 const currentUrl = ref('');
@@ -32,10 +35,12 @@ onMounted(getUrl);
       footer: 'soft'
     }" size="small" class="mx-auto shadow-lg rounded-lg">
       <template #header-extra>
+        <NTag v-if="isDev" size="small" round class="mr-2" type="info">dev</NTag>
         <CheckConnection v-model="isConnected" />
       </template>
 
       <template #default>
+        <span v-if="isDev">url => {{ currentUrl }}</span>
         <Transition mode="out-in" name="left">
           <SendToClient v-if="isConnected" :url="currentUrl" />
           <UnlinkView v-else />

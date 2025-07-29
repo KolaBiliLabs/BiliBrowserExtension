@@ -1,14 +1,18 @@
 <script setup lang="ts">
+import { useIsDev } from '@/hooks';
 import { NButton, NSpace } from 'naive-ui';
 
 const { url } = defineProps<{
   url: string
 }>()
 
+const { isDev } = useIsDev()
+
 const urlParams = ref<Record<string, string>>({});
 
 // 按钮点击事件处理函数
 const handleParseUrl = () => {
+  console.log('url => ', url)
   if (!url) {
     window.$message.warning('请等待URL加载或确保在有效页面。');
     return
@@ -16,6 +20,7 @@ const handleParseUrl = () => {
 
   try {
     const urlObj = new URL(url);
+    console.log("🚀 ~ handleParseUrl ~ urlObj:", urlObj)
     const params: Record<string, string> = {};
     urlObj.searchParams.forEach((value, key) => {
       params[key] = value;
@@ -74,6 +79,8 @@ function send() {
 
 <template>
   <NSpace vertical :size="15">
+    <span v-if="isDev">url => {{ url }}</span>
+
     <NButton type="primary" block class="w-full rounded-md shadow-md hover:shadow-lg transition-all duration-200"
       @click="send">
       添加到播放列表
