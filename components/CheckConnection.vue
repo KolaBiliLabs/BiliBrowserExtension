@@ -1,20 +1,13 @@
 <script setup lang="ts">
-import { SendMessageResponse } from '@/app';
+import { sendCheckConnection } from '@/utils';
 import { NTag } from 'naive-ui';
 
-const isConnected = ref(false)
+const isConnected = defineModel()
 
 async function checkConnection() {
-  const eventType = 'checkConnection'
-  const response: SendMessageResponse<{ isConnected: boolean }> = await chrome.runtime.sendMessage({
-    type: eventType,
+  await sendCheckConnection((connected: boolean) => {
+    isConnected.value = connected
   })
-
-  if (!response) {
-    window.$message.warning(`事件 "${eventType}" 已发送，但后台脚本未响应。`);
-  }
-  const { data } = response
-  isConnected.value = data.isConnected
 }
 
 function retry(fn: (...args: any[]) => void, times: number = 5, delay: number = 3000) {
