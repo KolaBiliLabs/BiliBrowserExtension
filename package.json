@@ -1,6 +1,6 @@
 {
-  "name": "wxt-vue-starter",
-  "description": "manifest.json description",
+  "name": "cola-be",
+  "description": "a browser extension named cola-be for cola-bili-helper",
   "private": true,
   "version": "0.0.0",
   "type": "module",

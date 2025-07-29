@@ -11,5 +11,14 @@ export default defineConfig({
     ],
   }),
   outDirTemplate: '{{browser}}-mv{{manifestVersion}}',
-  outDir: 'dist'
+  outDir: 'dist',
+  manifest: {
+    permissions: [
+      'activeTab',
+      'storage',
+    ],
+    host_permissions: [
+      '*://*.bilibili.com/*', // * 允许访问 Bilibili 域名下的所有 HTTPS 页面
+    ],
+  }
 });
