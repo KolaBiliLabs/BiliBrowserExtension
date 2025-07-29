@@ -27,7 +27,7 @@ const NaiveContentProvider = defineComponent({
 
 <template>
   <NConfigProvider :theme-overrides :theme="lightTheme">
-    <NMessageProvider>
+    <NMessageProvider :max="1" closable>
       <NDialogProvider>
         <NNotificationProvider>
           <slot />
