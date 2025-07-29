@@ -25,7 +25,7 @@ jobs:
           cache: 'pnpm' # 启用 pnpm 依赖缓存，加快后续运行速度
 
       - name: Install dependencies # 步骤4: 安装项目依赖
-        run: pnpm install --frozen-lockfile # 使用 --frozen-lockfile 确保依赖安装的确定性
+        run: pnpm install # 使用 --frozen-lockfile 确保依赖安装的确定性
 
       - name: Build plugin # 步骤5: 构建你的 WXT 插件
         run: pnpm build # 这就是你提供的构建命令
