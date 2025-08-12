@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import CheckConnection from '@/components/CheckConnection.vue';
-import Info from '@/components/Info.vue';
+import Info from '@/components/info/index.vue';
 import NonBilibiliView from '@/components/NonBilibiliView.vue';
 import Provider from '@/components/Provider.vue';
 import SendToClient from '@/components/SendToClient.vue';
@@ -44,7 +44,6 @@ onMounted(getUrl);
       </template>
 
       <template #default>
-        <span v-if="isDev">url => {{ currentUrl }}</span>
         <span v-if="isDev" class="text-xs text-gray-500 block mt-1">
           页面类型: {{ isBilibiliVideo ? 'Bilibili 视频页面' : '非 Bilibili 视频页面' }}
         </span>
