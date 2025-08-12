@@ -34,7 +34,7 @@ onMounted(getUrl);
 
 <template>
   <Provider>
-    <NCard title="Cola Bilibili Helper" style="width: 320px;" :segmented="{
+    <NCard title="Kola 插件" style="width: 320px;" :segmented="{
       content: true,
       footer: 'soft'
     }" size="small" class="mx-auto shadow-lg rounded-lg">
@@ -44,7 +44,7 @@ onMounted(getUrl);
       </template>
 
       <template #default>
-        <span v-if="isDev" class="text-xs text-gray-500 block mt-1">
+        <span v-if="isDev" class="text-xs text-gray-500 block mt-1 text-center mb-2">
           页面类型: {{ isBilibiliVideo ? 'Bilibili 视频页面' : '非 Bilibili 视频页面' }}
         </span>
 

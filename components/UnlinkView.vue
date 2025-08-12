@@ -12,7 +12,7 @@ async function reConnected() {
 
 <template>
   <NSpace vertical :size="15" align="center">
-    当前链接已断开
+    当前连接已断开
     <NButton block type="warning" @click="reConnected">尝试重新连接</NButton>
   </NSpace>
 </template>
