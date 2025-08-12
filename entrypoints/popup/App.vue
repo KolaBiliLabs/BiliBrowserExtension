@@ -1,29 +1,33 @@
 <script lang="ts" setup>
 import CheckConnection from '@/components/CheckConnection.vue';
 import Info from '@/components/Info.vue';
+import NonBilibiliView from '@/components/NonBilibiliView.vue';
 import Provider from '@/components/Provider.vue';
 import SendToClient from '@/components/SendToClient.vue';
 import UnlinkView from '@/components/UnlinkView.vue';
 import { useIsDev } from '@/hooks';
+import { getCurrentTabUrl, isBilibiliVideoPage } from '@/utils/index';
 import { NCard, NTag } from 'naive-ui';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 const { isDev } = useIsDev()
 
 const isConnected = ref(false)
 const currentUrl = ref('');
 
+// 计算属性：是否为 Bilibili 视频页面
+const isBilibiliVideo = computed(() => {
+  return isBilibiliVideoPage(currentUrl.value)
+})
+
 // 获取当前活动标签页的URL
-function getUrl() {
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    if (!tabs[0] || !tabs[0].url) {
-      return
-    }
-
-    currentUrl.value = tabs[0].url;
-  });
+async function getUrl() {
+  try {
+    currentUrl.value = await getCurrentTabUrl()
+  } catch (error) {
+    console.error('获取当前标签页 URL 失败:', error)
+  }
 }
-
 
 onMounted(getUrl);
 </script>
@@ -41,8 +45,18 @@ onMounted(getUrl);
 
       <template #default>
         <span v-if="isDev">url => {{ currentUrl }}</span>
+        <span v-if="isDev" class="text-xs text-gray-500 block mt-1">
+          页面类型: {{ isBilibiliVideo ? 'Bilibili 视频页面' : '非 Bilibili 视频页面' }}
+        </span>
+
         <Transition mode="out-in" name="left">
-          <SendToClient v-if="isConnected" :url="currentUrl" />
+          <!-- 已连接且是 Bilibili 视频页面 -->
+          <SendToClient v-if="isConnected && isBilibiliVideo" :url="currentUrl" />
+
+          <!-- 已连接但不是 Bilibili 视频页面 -->
+          <NonBilibiliView v-else-if="isConnected && !isBilibiliVideo" :url="currentUrl" />
+
+          <!-- 未连接 -->
           <UnlinkView v-else />
         </Transition>
       </template>
