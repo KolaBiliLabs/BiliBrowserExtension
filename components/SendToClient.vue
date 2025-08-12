@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import { useIsDev } from '@/hooks';
+import {
+  parseBilibiliVideoUrl,
+  sendEventToBackground,
+  showWarning
+} from '@/utils/index';
 import { NButton, NSpace } from 'naive-ui';
 
 const { url } = defineProps<{
@@ -10,67 +15,37 @@ const { isDev } = useIsDev()
 
 const urlParams = ref<Record<string, string>>({});
 
-// 按钮点击事件处理函数
+// 解析 URL 参数
 const handleParseUrl = () => {
   console.log('url => ', url)
   if (!url) {
-    window.$message.warning('请等待URL加载或确保在有效页面。');
-    return
+    showWarning('请等待URL加载或确保在有效页面。');
+    return false
   }
 
-  try {
-    const urlObj = new URL(url);
-    console.log("🚀 ~ handleParseUrl ~ urlObj:", urlObj)
-    const params: Record<string, string> = {};
-    urlObj.searchParams.forEach((value, key) => {
-      params[key] = value;
-    });
-    // 这里 /video/bvxxxx/ 最后一位为 ‘’
-    const bvId = urlObj.pathname.split('/').at(-2)
-    if (!bvId || !bvId.toLocaleLowerCase().startsWith('bv')) {
-      window.$message.warning('请确认当前源为b站视频播放页面')
-      return
-    }
-    params.bvId = bvId
-    urlParams.value = params;
-    return true
-  } catch (error) {
-    console.error("解析 URL 失败:", error);
-    window.$message.error('请确保是一个有效的URL。');
-    urlParams.value = {};
+  const params = parseBilibiliVideoUrl(url)
+  if (!params) {
+    showWarning('请确认当前源为b站视频播放页面')
+    return false
   }
+
+  urlParams.value = params
+  return true
 };
 
-
+// 处理参数发送
 const handleProcessParams = () => {
   if (!Object.keys(urlParams.value).length) {
-    window.$message.warning('没有可处理的参数。请先解析URL。');
+    showWarning('没有可处理的参数。请先解析URL。');
     return
   }
 
   sendEventToBackground('sendParamsToBackground', urlParams.value)
 };
 
-const sendEventToBackground = async (eventName: string, data: any) => {
-  try {
-    const response = await chrome.runtime.sendMessage({
-      type: eventName,
-      payload: data
-    });
-
-    if (!response) {
-      window.$message.warning(`事件 "${eventName}" 已发送，但后台脚本未响应。`);
-    }
-
-    window.$message[response.status as 'success' | 'error'](response.message)
-  } catch (error: any) {
-    window.$message.error(`发送事件 "${eventName}" 失败: ${error.message}`);
-  }
-};
-
+// 主要发送函数
 function send() {
   const parseResult = handleParseUrl()
-
   if (parseResult) {
     handleProcessParams()
   }
