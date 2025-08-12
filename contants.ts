@@ -26,13 +26,3 @@ export const INFO_LINKS: LinkConfig[] = [
     icon: CirclePercentIcon,
   },
 ]
-
-// 获取链接配置
-export function getInfoLinks(): LinkConfig[] {
-  return INFO_LINKS
-}
-
-// 根据 key 获取特定链接
-export function getInfoLinkByKey(key: string): LinkConfig | undefined {
-  return INFO_LINKS.find(link => link.key === key)
-}

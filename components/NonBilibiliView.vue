@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { Info, VideoOff } from 'lucide-vue-next'
 import { NAlert, NButton, NIcon, NSpace } from 'naive-ui'
-import { copyToClipboard, getPageTypeDescription, getPageTypeInfo, goToBilibili } from '@/utils/index'
+import {
+  copyToClipboard,
+  getPageTypeDescription,
+  getPageTypeInfo,
+  goToBilibili,
+} from '~/utils'
 
 const { url } = defineProps<{
   url: string

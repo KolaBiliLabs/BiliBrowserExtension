@@ -1,5 +1,4 @@
 import type { SendMessageResponse } from './app'
-import type { LinkConfig } from './components/info/config'
 
 // ==================== 连接相关工具函数 ====================
 
@@ -312,20 +311,6 @@ export function debounce<T extends (...args: any[]) => any>(
     }, wait)
   }
 }
-
-// 链接点击处理函数
-export function handleLinkClick(link: LinkConfig) {
-  // 记录点击事件
-  console.log(`点击链接: ${link.text} - ${link.url}`)
-
-  // 可以在这里添加更多逻辑，比如：
-  // - 发送分析事件
-  // - 记录用户行为
-  // - 性能监控
-}
-
-// 防抖的链接点击处理函数
-export const debouncedHandleLinkClick = debounce(handleLinkClick, 300)
 
 // 检查链接是否有效
 export function isValidLink(url: string): boolean {

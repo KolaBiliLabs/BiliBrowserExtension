@@ -8,7 +8,7 @@ import Provider from '@/components/Provider.vue'
 import SendToClient from '@/components/SendToClient.vue'
 import UnlinkView from '@/components/UnlinkView.vue'
 import { useIsDev } from '@/hooks'
-import { getCurrentTabUrl, isBilibiliVideoPage } from '@/utils/index'
+import { getCurrentTabUrl, isBilibiliVideoPage } from '~/utils'
 
 const { isDev } = useIsDev()
 

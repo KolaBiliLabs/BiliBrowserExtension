@@ -5,7 +5,7 @@ import {
   parseBilibiliVideoUrl,
   sendEventToBackground,
   showWarning,
-} from '@/utils/index'
+} from '@/utils'
 import SongConfigForm from './SongConfigForm.vue'
 
 const { url } = defineProps<{
@@ -146,39 +146,23 @@ function toggleExpand() {
 <template>
   <div
     class="transition-all duration-300 ease-in-out rounded-lg overflow-hidden"
-    :class="{
-      'bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/20 dark:border-blue-500/30 p-4': isExpanded,
-    }"
   >
     <!-- 按钮区域 -->
     <div class="flex justify-center items-center py-2">
       <NButtonGroup>
         <NButton
-          :type="isExpanded ? 'primary' : 'primary'"
-          class="relative overflow-hidden transition-all duration-200 ease-in-out"
-          :class="[
-            isExpanded ? 'bg-gradient-to-r from-blue-500 to-blue-700 border-blue-500' : '',
-          ]"
+          type="primary"
+          :class="{ 'expanded-button': isExpanded }"
           @click="send"
         >
-          <span
-            v-if="isExpanded"
-            class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"
-          />
           添加到播放列表
         </NButton>
         <NButton
-          :type="isExpanded ? 'primary' : 'default'"
-          class="relative overflow-hidden transition-all duration-200 ease-in-out"
-          :class="[
-            isExpanded ? 'bg-gradient-to-r from-blue-500 to-blue-700 border-blue-500' : '',
-          ]"
+          type="default"
+          tertiary
+          :class="{ 'expanded-button': isExpanded }"
           @click="toggleExpand"
         >
-          <span
-            v-if="isExpanded"
-            class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"
-          />
           <NIcon size="14">
             <CogIcon />
           </NIcon>
@@ -198,3 +182,33 @@ function toggleExpand() {
     </div>
   </div>
 </template>
+
+<style scoped>
+/* 展开按钮的条纹扫过动画效果 */
+.expanded-button {
+  background: linear-gradient(45deg, #3b82f6, #1d4ed8) !important;
+  border: 1px solid #3b82f6 !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.expanded-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: stripe 2s infinite;
+}
+
+@keyframes stripe {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+</style>
