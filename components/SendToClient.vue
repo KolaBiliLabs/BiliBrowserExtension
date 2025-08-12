@@ -1,19 +1,26 @@
 <script setup lang="ts">
-import { useIsDev } from '@/hooks';
 import {
   parseBilibiliVideoUrl,
   sendEventToBackground,
   showWarning
 } from '@/utils/index';
-import { NButton, NSpace } from 'naive-ui';
+import { CogIcon } from 'lucide-vue-next';
+import { NButton, NButtonGroup, NIcon } from 'naive-ui';
+import SongConfigForm from './SongConfigForm.vue';
 
 const { url } = defineProps<{
   url: string
 }>()
 
-const { isDev } = useIsDev()
-
 const urlParams = ref<Record<string, string>>({});
+const isExpanded = ref(false);
+
+// 表单数据
+const formData = ref({
+  songName: '',
+  startTime: 0,
+  endTime: 0
+});
 
 // 解析 URL 参数
 const handleParseUrl = () => {
@@ -50,15 +57,154 @@ function send() {
     handleProcessParams()
   }
 }
+
+// 展开表单处理函数
+function handleExpand() {
+  console.log('展开表单配置')
+  isExpanded.value = true
+
+  // 展开时的处理逻辑
+  // 1. 解析当前 URL 参数
+  handleParseUrl()
+
+  // 2. 可以在这里添加其他展开时的初始化逻辑
+  // 例如：从本地存储加载上次的配置
+  // 例如：获取视频信息并预填充表单
+}
+
+// 关闭表单处理函数
+function handleCollapse() {
+  console.log('关闭表单配置')
+  isExpanded.value = false
+
+  // 关闭时的处理逻辑
+  // 1. 保存当前配置到本地存储
+  saveFormData()
+
+  // 2. 清理表单数据（可选）
+  // clearFormData()
+
+  // 3. 可以在这里添加其他关闭时的清理逻辑
+}
+
+// 保存表单数据到本地存储
+function saveFormData() {
+  try {
+    const dataToSave = {
+      songName: formData.value.songName,
+      startTime: formData.value.startTime,
+      endTime: formData.value.endTime,
+      timestamp: Date.now()
+    }
+
+    chrome.storage.local.set({
+      'formData': dataToSave
+    }, () => {
+      console.log('表单数据已保存到本地存储')
+    })
+  } catch (error) {
+    console.error('保存表单数据失败:', error)
+  }
+}
+
+// 从本地存储加载表单数据
+function loadFormData() {
+  try {
+    chrome.storage.local.get(['formData'], (result) => {
+      if (result.formData) {
+        const savedData = result.formData
+        formData.value.songName = savedData.songName || ''
+        formData.value.startTime = savedData.startTime || 0
+        formData.value.endTime = savedData.endTime || 0
+        console.log('已从本地存储加载表单数据')
+      }
+    })
+  } catch (error) {
+    console.error('加载表单数据失败:', error)
+  }
+}
+
+// 清理表单数据
+function clearFormData() {
+  formData.value = {
+    songName: '',
+    startTime: 0,
+    endTime: 0
+  }
+}
+
+// 切换展开状态
+function toggleExpand() {
+  if (isExpanded.value) {
+    handleCollapse()
+  } else {
+    handleExpand()
+  }
+}
 </script>
 
 <template>
-  <NSpace vertical :size="15">
-    <span v-if="isDev">url => {{ url }}</span>
+  <div class="transition-all duration-300 ease-in-out rounded-lg overflow-hidden" :class="{
+    'bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/20 dark:border-blue-500/30 p-4': isExpanded
+  }">
+    <!-- 按钮区域 -->
+    <div class="flex justify-center items-center py-2">
+      <NButtonGroup>
+        <NButton :type="isExpanded ? 'primary' : 'primary'" :class="{ 'expanded-button': isExpanded }" @click="send">
+          添加到播放列表
+        </NButton>
+        <NButton :type="isExpanded ? 'primary' : 'default'" :class="{ 'expanded-button': isExpanded }"
+          @click="toggleExpand">
+          <NIcon size="14">
+            <CogIcon />
+          </NIcon>
+        </NButton>
+      </NButtonGroup>
+    </div>
 
-    <NButton type="primary" block class="w-full rounded-md shadow-md hover:shadow-lg transition-all duration-200"
-      @click="send">
-      添加到播放列表
-    </NButton>
-  </NSpace>
+    <!-- 可展开的表单区域 -->
+    <div class="transition-all duration-300 ease-in-out overflow-hidden" :class="{
+      'max-h-0 opacity-0': !isExpanded,
+      'max-h-80 opacity-100 mt-4': isExpanded
+    }">
+      <SongConfigForm v-model="formData" />
+    </div>
+  </div>
 </template>
+
+<style scoped>
+.expanded-button {
+  background: linear-gradient(45deg, #3b82f6, #1d4ed8) !important;
+  border: 1px solid #3b82f6 !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.expanded-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: stripe 2s infinite;
+}
+
+@keyframes stripe {
+  0% {
+    left: -100%;
+  }
+
+  100% {
+    left: 100%;
+  }
+}
+
+/* 减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .expanded-button::before {
+    animation: none;
+  }
+}
+</style>
