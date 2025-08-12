@@ -40,5 +40,5 @@ body {
 .left-enter-from,
 .left-leave-to {
   opacity: 0;
-  transform: translateX(-50%);
+  transform: translateX(-20px);
 }
