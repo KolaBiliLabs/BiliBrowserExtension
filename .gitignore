@@ -27,3 +27,5 @@ web-ext.config.ts
 
 dist
 node_modules
+
+.cursorrules
