@@ -1,5 +1,5 @@
-import tailwindcss from '@tailwindcss/vite';
-import { defineConfig } from 'wxt';
+import tailwindcss from '@tailwindcss/vite'
+import { defineConfig } from 'wxt'
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
@@ -20,5 +20,5 @@ export default defineConfig({
     host_permissions: [
       '*://*.bilibili.com/*', // * 允许访问 Bilibili 域名下的所有 HTTPS 页面
     ],
-  }
-});
+  },
+})

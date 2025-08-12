@@ -212,8 +212,8 @@ if (params) {
 ```typescript
 import {
   getCurrentTabUrl,
-  isBilibiliVideoPage,
-  getPageTypeDescription
+  getPageTypeDescription,
+  isBilibiliVideoPage
 } from '@/utils/index'
 
 async function analyzeCurrentPage() {

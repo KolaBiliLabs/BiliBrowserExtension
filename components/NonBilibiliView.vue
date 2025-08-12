@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { copyToClipboard, getPageTypeDescription, getPageTypeInfo, goToBilibili } from '@/utils/index';
-import { Info, VideoOff } from 'lucide-vue-next';
-import { NAlert, NButton, NIcon, NSpace } from 'naive-ui';
+import { Info, VideoOff } from 'lucide-vue-next'
+import { NAlert, NButton, NIcon, NSpace } from 'naive-ui'
+import { copyToClipboard, getPageTypeDescription, getPageTypeInfo, goToBilibili } from '@/utils/index'
 
 const { url } = defineProps<{
   url: string
@@ -10,18 +10,18 @@ const { url } = defineProps<{
 const pageType = computed(() => getPageTypeDescription(url))
 
 // 获取页面类型对应的图标和颜色
-const getPageTypeInfoWithIcon = (type: string) => {
+function getPageTypeInfoWithIcon(type: string) {
   const info = getPageTypeInfo(type)
 
   // 根据图标名称返回对应的组件
   const iconMap = {
-    'Info': Info,
-    'VideoOff': VideoOff
+    Info,
+    VideoOff,
   }
 
   return {
     ...info,
-    icon: iconMap[info.icon as keyof typeof iconMap] || Info
+    icon: iconMap[info.icon as keyof typeof iconMap] || Info,
   }
 }
 
@@ -35,7 +35,12 @@ function copyCurrentUrl() {
 
 <template>
   <NSpace vertical :size="15" align="center">
-    <NAlert :type="pageInfo.color" :title="pageType" :show-icon="false" class="w-full">
+    <NAlert
+      :type="pageInfo.color"
+      :title="pageType"
+      :show-icon="false"
+      class="w-full"
+    >
       <template #icon>
         <NIcon>
           <component :is="pageInfo.icon" />
@@ -45,13 +50,21 @@ function copyCurrentUrl() {
     </NAlert>
 
     <NSpace vertical :size="10" class="w-full">
-      <NButton type="primary" block @click="goToBilibili"
-        class="rounded-md shadow-md hover:shadow-lg transition-all duration-200">
+      <NButton
+        type="primary"
+        block
+        class="rounded-md shadow-md hover:shadow-lg transition-all duration-200"
+        @click="goToBilibili"
+      >
         前往 Bilibili
       </NButton>
 
-      <NButton type="default" block @click="copyCurrentUrl"
-        class="rounded-md shadow-md hover:shadow-lg transition-all duration-200">
+      <NButton
+        type="default"
+        block
+        class="rounded-md shadow-md hover:shadow-lg transition-all duration-200"
+        @click="copyCurrentUrl"
+      >
         复制页面链接
       </NButton>
     </NSpace>

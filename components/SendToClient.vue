@@ -1,32 +1,32 @@
 <script setup lang="ts">
+import { CogIcon } from 'lucide-vue-next'
+import { NButton, NButtonGroup, NIcon } from 'naive-ui'
 import {
   parseBilibiliVideoUrl,
   sendEventToBackground,
-  showWarning
-} from '@/utils/index';
-import { CogIcon } from 'lucide-vue-next';
-import { NButton, NButtonGroup, NIcon } from 'naive-ui';
-import SongConfigForm from './SongConfigForm.vue';
+  showWarning,
+} from '@/utils/index'
+import SongConfigForm from './SongConfigForm.vue'
 
 const { url } = defineProps<{
   url: string
 }>()
 
-const urlParams = ref<Record<string, string>>({});
-const isExpanded = ref(false);
+const urlParams = ref<Record<string, string>>({})
+const isExpanded = ref(false)
 
 // 表单数据
 const formData = ref({
   songName: '',
   startTime: 0,
-  endTime: 0
-});
+  endTime: 0,
+})
 
 // 解析 URL 参数
-const handleParseUrl = () => {
+function handleParseUrl() {
   console.log('url => ', url)
   if (!url) {
-    showWarning('请等待URL加载或确保在有效页面。');
+    showWarning('请等待URL加载或确保在有效页面。')
     return false
   }
 
@@ -38,17 +38,17 @@ const handleParseUrl = () => {
 
   urlParams.value = params
   return true
-};
+}
 
 // 处理参数发送
-const handleProcessParams = () => {
+function handleProcessParams() {
   if (!Object.keys(urlParams.value).length) {
-    showWarning('没有可处理的参数。请先解析URL。');
+    showWarning('没有可处理的参数。请先解析URL。')
     return
   }
 
   sendEventToBackground('sendParamsToBackground', urlParams.value)
-};
+}
 
 // 主要发送函数
 function send() {
@@ -94,11 +94,11 @@ function saveFormData() {
       songName: formData.value.songName,
       startTime: formData.value.startTime,
       endTime: formData.value.endTime,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     }
 
     chrome.storage.local.set({
-      'formData': dataToSave
+      formData: dataToSave,
     }, () => {
       console.log('表单数据已保存到本地存储')
     })
@@ -108,7 +108,7 @@ function saveFormData() {
 }
 
 // 从本地存储加载表单数据
-function loadFormData() {
+function _loadFormData() {
   try {
     chrome.storage.local.get(['formData'], (result) => {
       if (result.formData) {
@@ -125,11 +125,11 @@ function loadFormData() {
 }
 
 // 清理表单数据
-function clearFormData() {
+function _clearFormData() {
   formData.value = {
     songName: '',
     startTime: 0,
-    endTime: 0
+    endTime: 0,
   }
 }
 
@@ -144,17 +144,41 @@ function toggleExpand() {
 </script>
 
 <template>
-  <div class="transition-all duration-300 ease-in-out rounded-lg overflow-hidden" :class="{
-    'bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/20 dark:border-blue-500/30 p-4': isExpanded
-  }">
+  <div
+    class="transition-all duration-300 ease-in-out rounded-lg overflow-hidden"
+    :class="{
+      'bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/20 dark:border-blue-500/30 p-4': isExpanded,
+    }"
+  >
     <!-- 按钮区域 -->
     <div class="flex justify-center items-center py-2">
       <NButtonGroup>
-        <NButton :type="isExpanded ? 'primary' : 'primary'" :class="{ 'expanded-button': isExpanded }" @click="send">
+        <NButton
+          :type="isExpanded ? 'primary' : 'primary'"
+          class="relative overflow-hidden transition-all duration-200 ease-in-out"
+          :class="[
+            isExpanded ? 'bg-gradient-to-r from-blue-500 to-blue-700 border-blue-500' : '',
+          ]"
+          @click="send"
+        >
+          <span
+            v-if="isExpanded"
+            class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"
+          />
           添加到播放列表
         </NButton>
-        <NButton :type="isExpanded ? 'primary' : 'default'" :class="{ 'expanded-button': isExpanded }"
-          @click="toggleExpand">
+        <NButton
+          :type="isExpanded ? 'primary' : 'default'"
+          class="relative overflow-hidden transition-all duration-200 ease-in-out"
+          :class="[
+            isExpanded ? 'bg-gradient-to-r from-blue-500 to-blue-700 border-blue-500' : '',
+          ]"
+          @click="toggleExpand"
+        >
+          <span
+            v-if="isExpanded"
+            class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"
+          />
           <NIcon size="14">
             <CogIcon />
           </NIcon>
@@ -163,48 +187,14 @@ function toggleExpand() {
     </div>
 
     <!-- 可展开的表单区域 -->
-    <div class="transition-all duration-300 ease-in-out overflow-hidden" :class="{
-      'max-h-0 opacity-0': !isExpanded,
-      'max-h-80 opacity-100 mt-4': isExpanded
-    }">
+    <div
+      class="transition-all duration-300 ease-in-out overflow-hidden"
+      :class="{
+        'max-h-0 opacity-0': !isExpanded,
+        'max-h-80 opacity-100 mt-4': isExpanded,
+      }"
+    >
       <SongConfigForm v-model="formData" />
     </div>
   </div>
 </template>
-
-<style scoped>
-.expanded-button {
-  background: linear-gradient(45deg, #3b82f6, #1d4ed8) !important;
-  border: 1px solid #3b82f6 !important;
-  position: relative;
-  overflow: hidden;
-}
-
-.expanded-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  animation: stripe 2s infinite;
-}
-
-@keyframes stripe {
-  0% {
-    left: -100%;
-  }
-
-  100% {
-    left: 100%;
-  }
-}
-
-/* 减少动画偏好 */
-@media (prefers-reduced-motion: reduce) {
-  .expanded-button::before {
-    animation: none;
-  }
-}
-</style>

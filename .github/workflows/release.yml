@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20' # 推荐使用 Node.js LTS 版本，例如 20
-          cache: 'pnpm' # 启用 pnpm 依赖缓存，加快后续运行速度
+          cache: pnpm # 启用 pnpm 依赖缓存，加快后续运行速度
 
       - name: Install dependencies # 步骤4: 安装项目依赖
         run: pnpm install # 使用 --frozen-lockfile 确保依赖安装的确定性

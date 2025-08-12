@@ -1,33 +1,33 @@
 <script setup lang="ts">
-import { NForm, NFormItem, NInput, NInputNumber } from 'naive-ui';
+import { NForm, NFormItem, NInput, NInputNumber } from 'naive-ui'
 
 // 定义表单数据接口
 interface FormData {
-  songName: string;
-  startTime: number;
-  endTime: number;
+  songName: string
+  startTime: number
+  endTime: number
 }
+
+// 组件名称
+defineOptions({
+  name: 'song-config-form',
+})
 
 // 定义 props
 const props = defineProps<{
-  modelValue: FormData;
-}>();
+  modelValue: FormData
+}>()
 
 // 定义 emits
 const emit = defineEmits<{
-  'update:modelValue': [value: FormData];
-}>();
+  'update:modelValue': [value: FormData]
+}>()
 
 // 表单数据
 const formData = computed({
   get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value)
-});
-
-// 组件名称
-defineOptions({
-  name: 'SongConfigForm'
-});
+  set: value => emit('update:modelValue', value),
+})
 </script>
 
 <template>
@@ -38,11 +38,23 @@ defineOptions({
       </NFormItem>
 
       <NFormItem label="开始时间">
-        <NInputNumber v-model:value="formData.startTime" placeholder="开始时间(秒)" :min="0" :precision="2" clearable />
+        <NInputNumber
+          v-model:value="formData.startTime"
+          placeholder="开始时间(秒)"
+          :min="0"
+          :precision="2"
+          clearable
+        />
       </NFormItem>
 
       <NFormItem label="结束时间">
-        <NInputNumber v-model:value="formData.endTime" placeholder="结束时间(秒)" :min="0" :precision="2" clearable />
+        <NInputNumber
+          v-model:value="formData.endTime"
+          placeholder="结束时间(秒)"
+          :min="0"
+          :precision="2"
+          clearable
+        />
       </NFormItem>
     </NForm>
   </div>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { sendCheckConnection } from '@/utils';
-import { NTag } from 'naive-ui';
+import { NTag } from 'naive-ui'
+import { sendCheckConnection } from '@/utils'
 
-const isConnected = defineModel()
+const isConnected = defineModel<boolean>()
 
 async function checkConnection() {
   await sendCheckConnection((connected: boolean) => {

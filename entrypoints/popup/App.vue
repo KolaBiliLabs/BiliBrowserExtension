@@ -1,19 +1,19 @@
 <script lang="ts" setup>
-import CheckConnection from '@/components/CheckConnection.vue';
-import Info from '@/components/info/index.vue';
-import NonBilibiliView from '@/components/NonBilibiliView.vue';
-import Provider from '@/components/Provider.vue';
-import SendToClient from '@/components/SendToClient.vue';
-import UnlinkView from '@/components/UnlinkView.vue';
-import { useIsDev } from '@/hooks';
-import { getCurrentTabUrl, isBilibiliVideoPage } from '@/utils/index';
-import { NCard, NTag } from 'naive-ui';
-import { computed, onMounted, ref } from 'vue';
+import { NCard, NTag } from 'naive-ui'
+import { computed, onMounted, ref } from 'vue'
+import CheckConnection from '@/components/CheckConnection.vue'
+import Info from '@/components/info/index.vue'
+import NonBilibiliView from '@/components/NonBilibiliView.vue'
+import Provider from '@/components/Provider.vue'
+import SendToClient from '@/components/SendToClient.vue'
+import UnlinkView from '@/components/UnlinkView.vue'
+import { useIsDev } from '@/hooks'
+import { getCurrentTabUrl, isBilibiliVideoPage } from '@/utils/index'
 
 const { isDev } = useIsDev()
 
 const isConnected = ref(false)
-const currentUrl = ref('');
+const currentUrl = ref('')
 
 // 计算属性：是否为 Bilibili 视频页面
 const isBilibiliVideo = computed(() => {
@@ -29,17 +29,31 @@ async function getUrl() {
   }
 }
 
-onMounted(getUrl);
+onMounted(getUrl)
 </script>
 
 <template>
   <Provider>
-    <NCard title="Kola 插件" style="width: 320px;" :segmented="{
-      content: true,
-      footer: 'soft'
-    }" size="small" class="mx-auto shadow-lg rounded-lg">
+    <NCard
+      title="Kola 插件"
+      style="width: 320px;"
+      :segmented="{
+        content: true,
+        footer: 'soft',
+      }"
+      size="small"
+      class="mx-auto shadow-lg rounded-lg"
+    >
       <template #header-extra>
-        <NTag v-if="isDev" size="small" round class="mr-2" type="info">dev</NTag>
+        <NTag
+          v-if="isDev"
+          size="small"
+          round
+          class="mr-2"
+          type="info"
+        >
+          dev
+        </NTag>
         <CheckConnection v-model="isConnected" />
       </template>
 

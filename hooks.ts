@@ -6,6 +6,6 @@ export function useIsDev() {
   })
 
   return {
-    isDev
+    isDev,
   }
 }

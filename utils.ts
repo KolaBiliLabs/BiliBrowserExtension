@@ -1,4 +1,5 @@
-import { SendMessageResponse } from "./app";
+import type { SendMessageResponse } from './app'
+import type { LinkConfig } from './components/info/config'
 
 // ==================== 连接相关工具函数 ====================
 
@@ -13,7 +14,7 @@ export async function sendCheckConnection(callback: (connected: boolean) => void
   })
 
   if (!response) {
-    window.$message.warning(`事件 "${eventType}" 已发送，但后台脚本未响应。`);
+    window.$message.warning(`事件 "${eventType}" 已发送，但后台脚本未响应。`)
     return
   }
   const { data } = response
@@ -29,18 +30,18 @@ export async function sendEventToBackground(eventName: string, data: any) {
   try {
     const response = await chrome.runtime.sendMessage({
       type: eventName,
-      payload: data
-    });
+      payload: data,
+    })
 
     if (!response) {
-      window.$message.warning(`事件 "${eventName}" 已发送，但后台脚本未响应。`);
+      window.$message.warning(`事件 "${eventName}" 已发送，但后台脚本未响应。`)
       return
     }
 
     window.$message[response.status as 'success' | 'error'](response.message)
     return response
   } catch (error: any) {
-    window.$message.error(`发送事件 "${eventName}" 失败: ${error.message}`);
+    window.$message.error(`发送事件 "${eventName}" 失败: ${error.message}`)
     throw error
   }
 }
@@ -108,7 +109,8 @@ export function parseBilibiliVideoUrl(url: string): Record<string, string> | nul
  * @returns 页面类型描述
  */
 export function getPageTypeDescription(url: string): string {
-  if (!url) return '未知页面'
+  if (!url)
+    return '未知页面'
 
   try {
     const urlObj = new URL(url)
@@ -122,21 +124,9 @@ export function getPageTypeDescription(url: string): string {
       }
     }
 
-    // 可以根据需要添加其他网站的判断
-    if (hostname.includes('youtube.com')) {
-      return 'YouTube 页面'
-    }
-
-    if (hostname.includes('youku.com')) {
-      return '优酷页面'
-    }
-
-    if (hostname.includes('iqiyi.com')) {
-      return '爱奇艺页面'
-    }
-
     return `${hostname} 页面`
   } catch (error) {
+    console.error(error)
     return '无效页面'
   }
 }
@@ -163,26 +153,26 @@ export function getPageTypeInfo(type: string): PageTypeInfo {
       return {
         icon: 'Info',
         color: 'info',
-        message: '当前页面不是 Bilibili 视频播放页面，无法使用视频助手功能。'
+        message: '当前页面不是 Bilibili 视频播放页面，无法使用视频助手功能。',
       }
     case 'YouTube 页面':
       return {
         icon: 'VideoOff',
         color: 'warning',
-        message: '当前为 YouTube 页面，本扩展仅支持 Bilibili 视频助手功能。'
+        message: '当前为 YouTube 页面，本扩展仅支持 Bilibili 视频助手功能。',
       }
     case '优酷页面':
     case '爱奇艺页面':
       return {
         icon: 'VideoOff',
         color: 'warning',
-        message: '当前为国内视频平台页面，本扩展仅支持 Bilibili 视频助手功能。'
+        message: '当前为国内视频平台页面，本扩展仅支持 Bilibili 视频助手功能。',
       }
     default:
       return {
         icon: 'Info',
         color: 'info',
-        message: '当前页面不支持视频助手功能，请访问 Bilibili 视频播放页面。'
+        message: '当前页面不支持视频助手功能，请访问 Bilibili 视频播放页面。',
       }
   }
 }
@@ -205,13 +195,13 @@ export function goToBilibili() {
 export async function copyToClipboard(
   text: string,
   successMessage: string = '已复制到剪贴板',
-  errorMessage: string = '复制失败'
+  errorMessage: string = '复制失败',
 ): Promise<void> {
   if (navigator.clipboard) {
     try {
       await navigator.clipboard.writeText(text)
       window.$message.success(successMessage)
-    } catch (error) {
+    } catch {
       window.$message.error(errorMessage)
     }
   } else {
@@ -223,7 +213,7 @@ export async function copyToClipboard(
     try {
       document.execCommand('copy')
       window.$message.success(successMessage)
-    } catch (err) {
+    } catch {
       window.$message.error(errorMessage)
     }
     document.body.removeChild(textArea)
@@ -255,6 +245,7 @@ export function getCurrentTabUrl(): Promise<string> {
  */
 export function isValidUrl(url: string): boolean {
   try {
+    // eslint-disable-next-line no-new
     new URL(url)
     return true
   } catch {
@@ -302,4 +293,64 @@ export function showWarning(message: string) {
  */
 export function showSuccess(message: string) {
   window.$message.success(message)
+}
+
+// 防抖函数，用于优化点击事件
+export function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number,
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout | null = null
+
+  return (...args: Parameters<T>) => {
+    if (timeout) {
+      clearTimeout(timeout)
+    }
+
+    timeout = setTimeout(() => {
+      func(...args)
+    }, wait)
+  }
+}
+
+// 链接点击处理函数
+export function handleLinkClick(link: LinkConfig) {
+  // 记录点击事件
+  console.log(`点击链接: ${link.text} - ${link.url}`)
+
+  // 可以在这里添加更多逻辑，比如：
+  // - 发送分析事件
+  // - 记录用户行为
+  // - 性能监控
+}
+
+// 防抖的链接点击处理函数
+export const debouncedHandleLinkClick = debounce(handleLinkClick, 300)
+
+// 检查链接是否有效
+export function isValidLink(url: string): boolean {
+  try {
+    // eslint-disable-next-line no-new
+    new URL(url)
+    return true
+  } catch {
+    return false
+  }
+}
+
+// 获取链接域名
+export function getLinkDomain(url: string): string {
+  try {
+    return new URL(url).hostname
+  } catch {
+    return ''
+  }
+}
+
+// 格式化链接显示文本
+export function formatLinkText(text: string, maxLength: number = 20): string {
+  if (text.length <= maxLength) {
+    return text
+  }
+  return `${text.slice(0, maxLength)}...`
 }
