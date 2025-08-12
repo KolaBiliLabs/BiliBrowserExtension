@@ -33,7 +33,6 @@ const NaiveContentProvider = defineComponent({
     <NMessageProvider
       :max="1"
       closable
-      :duration="1000"
       placement="bottom"
     >
       <slot />

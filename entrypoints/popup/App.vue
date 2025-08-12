@@ -34,16 +34,7 @@ onMounted(getUrl)
 
 <template>
   <Provider>
-    <NCard
-      title="Kola 插件"
-      style="width: 320px;"
-      :segmented="{
-        content: true,
-        footer: 'soft',
-      }"
-      size="small"
-      class="mx-auto shadow-lg rounded-lg"
-    >
+    <NCard title="Kola 插件" class="w-full rounded-none">
       <template #header-extra>
         <NTag
           v-if="isDev"
@@ -62,7 +53,7 @@ onMounted(getUrl)
           页面类型: {{ isBilibiliVideo ? 'Bilibili 视频页面' : '非 Bilibili 视频页面' }}
         </span>
 
-        <Transition mode="out-in" name="left">
+        <Transition mode="out-in" name="fade">
           <!-- 已连接且是 Bilibili 视频页面 -->
           <SendToClient v-if="isConnected && isBilibiliVideo" :url="currentUrl" />
 
