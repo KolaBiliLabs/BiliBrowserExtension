@@ -339,3 +339,330 @@ export function formatLinkText(text: string, maxLength: number = 20): string {
   }
   return `${text.slice(0, maxLength)}...`
 }
+
+// ==================== DOM 操作工具函数 ====================
+
+/**
+ * 在目标页面中执行脚本并获取 DOM 元素
+ * @param selector CSS 选择器
+ * @param callback 回调函数，接收查询结果
+ */
+export function queryDOMElement(
+  selector: string,
+  callback: (result: any) => void,
+): void {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (!tabs[0] || !tabs[0].id) {
+      console.error('无法获取当前标签页')
+      callback(null)
+      return
+    }
+
+    const tabId = tabs[0].id
+
+    chrome.scripting.executeScript({
+      target: { tabId },
+      func: (cssSelector: string) => {
+        // 在目标页面上下文中执行
+        const element = document.querySelector(cssSelector)
+        if (element) {
+          // 返回元素的基本信息（避免序列化问题）
+          return {
+            tagName: element.tagName,
+            id: element.id,
+            className: element.className,
+            textContent: element.textContent?.substring(0, 100), // 限制文本长度
+            attributes: Array.from(element.attributes).map(attr => ({
+              name: attr.name,
+              value: attr.value,
+            })),
+          }
+        }
+        return null
+      },
+      args: [selector],
+    }, (results) => {
+      if (chrome.runtime.lastError) {
+        console.error('执行脚本失败:', chrome.runtime.lastError)
+        callback(null)
+        return
+      }
+
+      if (results && results[0]) {
+        callback(results[0].result)
+      } else {
+        callback(null)
+      }
+    })
+  })
+}
+
+/**
+ * 获取页面中所有匹配的 DOM 元素
+ * @param selector CSS 选择器
+ * @param callback 回调函数，接收查询结果数组
+ */
+export function queryAllDOMElements(
+  selector: string,
+  callback: (results: any[]) => void,
+): void {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (!tabs[0] || !tabs[0].id) {
+      console.error('无法获取当前标签页')
+      callback([])
+      return
+    }
+
+    const tabId = tabs[0].id
+
+    chrome.scripting.executeScript({
+      target: { tabId },
+      func: (cssSelector: string) => {
+        // 在目标页面上下文中执行
+        const elements = document.querySelectorAll(cssSelector)
+        return Array.from(elements).map(element => ({
+          tagName: element.tagName,
+          id: element.id,
+          className: element.className,
+          textContent: element.textContent?.substring(0, 100),
+          attributes: Array.from(element.attributes).map(attr => ({
+            name: attr.name,
+            value: attr.value,
+          })),
+        }))
+      },
+      args: [selector],
+    }, (results) => {
+      if (chrome.runtime.lastError) {
+        console.error('执行脚本失败:', chrome.runtime.lastError)
+        callback([])
+        return
+      }
+
+      if (results && results[0]) {
+        callback(results[0].result!)
+      } else {
+        callback([])
+      }
+    })
+  })
+}
+
+/**
+ * 获取页面 window 对象信息
+ * @param callback 回调函数，接收 window 信息
+ */
+export function getWindowInfo(callback: (windowInfo: any) => void): void {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (!tabs[0] || !tabs[0].id) {
+      console.error('无法获取当前标签页')
+      callback(null)
+      return
+    }
+
+    const tabId = tabs[0].id
+
+    chrome.scripting.executeScript({
+      target: { tabId },
+      func: () => {
+        // 在目标页面上下文中执行
+        return {
+          location: {
+            href: window.location.href,
+            hostname: window.location.hostname,
+            pathname: window.location.pathname,
+            search: window.location.search,
+            hash: window.location.hash,
+          },
+          title: document.title,
+          userAgent: navigator.userAgent,
+          viewport: {
+            width: window.innerWidth,
+            height: window.innerHeight,
+          },
+        }
+      },
+    }, (results) => {
+      if (chrome.runtime.lastError) {
+        console.error('执行脚本失败:', chrome.runtime.lastError)
+        callback(null)
+        return
+      }
+
+      if (results && results[0]) {
+        callback(results[0].result)
+      } else {
+        callback(null)
+      }
+    })
+  })
+}
+
+/**
+ * 获取视频元素信息
+ * @param cssSelector 视频元素选择器，默认为 'video'
+ * @param callback 回调函数，接收视频信息
+ */
+export function getVideoInfo(cssSelector: string = 'video', callback: (videoInfo: any) => void): void {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (!tabs[0] || !tabs[0].id) {
+      console.error('无法获取当前标签页')
+      callback(null)
+      return
+    }
+
+    const tabId = tabs[0].id
+
+    console.log('cssSelector => ', cssSelector)
+
+    chrome.scripting.executeScript({
+      target: { tabId },
+      func: (selector: string) => {
+        // 在目标页面上下文中执行，使用传入的选择器参数
+        const videoElement = document.querySelector(selector) as HTMLVideoElement
+        console.log('videoElement => ', videoElement)
+        if (videoElement) {
+          return {
+            currentTime: videoElement.currentTime,
+            duration: videoElement.duration,
+            paused: videoElement.paused,
+            src: videoElement.src,
+            title: document.title,
+            url: window.location.href,
+            videoWidth: videoElement.videoWidth,
+            videoHeight: videoElement.videoHeight,
+            readyState: videoElement.readyState,
+          }
+        }
+        return null
+      },
+      args: [cssSelector], // 将选择器作为参数传递给函数
+    }, (results) => {
+      if (chrome.runtime.lastError) {
+        console.error('执行脚本失败:', chrome.runtime.lastError)
+        callback(null)
+        return
+      }
+
+      if (results && results[0]) {
+        callback(results[0].result)
+      } else {
+        callback(null)
+      }
+    })
+  })
+}
+
+/**
+ * 通用 DOM 查询函数，支持复杂查询
+ */
+export function queryDOMWithOptions(
+  selector: string,
+  options: {
+    multiple?: boolean
+    timeout?: number
+    waitForElement?: boolean
+  } = {},
+  callback: (result: any) => void,
+): void {
+  const { multiple: _multiple = false, timeout: _timeout = 5000, waitForElement: _waitForElement = false } = options
+
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (!tabs[0] || !tabs[0].id) {
+      console.error('无法获取当前标签页')
+      callback(null)
+      return
+    }
+
+    const tabId = tabs[0].id
+
+    chrome.scripting.executeScript({
+      target: { tabId },
+      func: (cssSelector: string, queryOptions: any) => {
+        const { multiple: isMultiple, timeout: waitTimeout, waitForElement: shouldWait } = queryOptions
+
+        // 等待元素出现的函数
+        function waitForElement(selector: string, timeout: number): Promise<Element | null> {
+          return new Promise((resolve) => {
+            const element = document.querySelector(selector)
+            if (element) {
+              resolve(element)
+              return
+            }
+
+            if (!shouldWait) {
+              resolve(null)
+              return
+            }
+
+            const observer = new MutationObserver(() => {
+              const foundElement = document.querySelector(selector)
+              if (foundElement) {
+                observer.disconnect()
+                resolve(foundElement)
+              }
+            })
+
+            observer.observe(document.body, {
+              childList: true,
+              subtree: true,
+            })
+
+            // 设置超时
+            setTimeout(() => {
+              observer.disconnect()
+              resolve(null)
+            }, timeout)
+          })
+        }
+
+        // 获取元素信息的函数
+        function getElementInfo(element: Element) {
+          return {
+            tagName: element.tagName,
+            id: element.id,
+            className: element.className,
+            textContent: element.textContent?.substring(0, 200),
+            attributes: Array.from(element.attributes).map(attr => ({
+              name: attr.name,
+              value: attr.value,
+            })),
+            // 如果是视频元素，添加额外信息
+            ...(element.tagName === 'VIDEO' && {
+              currentTime: (element as HTMLVideoElement).currentTime,
+              duration: (element as HTMLVideoElement).duration,
+              paused: (element as HTMLVideoElement).paused,
+              src: (element as HTMLVideoElement).src,
+            }),
+          }
+        }
+
+        // 执行查询
+        if (isMultiple) {
+          const elements = document.querySelectorAll(cssSelector)
+          return Array.from(elements).map(getElementInfo)
+        } else {
+          return waitForElement(cssSelector, waitTimeout).then((element) => {
+            if (element) {
+              return getElementInfo(element)
+            }
+            return null
+          })
+        }
+      },
+      args: [selector, options],
+    }, (results) => {
+      if (chrome.runtime.lastError) {
+        console.error('执行脚本失败:', chrome.runtime.lastError)
+        callback(null)
+        return
+      }
+
+      if (results && results[0]) {
+        callback(results[0].result)
+      } else {
+        callback(null)
+      }
+    })
+  })
+}

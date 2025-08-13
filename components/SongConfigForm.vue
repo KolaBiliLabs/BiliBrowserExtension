@@ -49,11 +49,7 @@ function formatTime(seconds: number): string {
         placeholder="请输入歌曲名称"
         clearable
         class="glass-effect"
-      >
-        <template #password-visible-icon>
-          <EyeIcon class="size-4" />
-        </template>
-      </NInput>
+      />
     </div>
 
     <!-- 时间范围 -->

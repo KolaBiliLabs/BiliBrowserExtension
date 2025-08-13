@@ -2,6 +2,7 @@
 import { CogIcon, XIcon } from 'lucide-vue-next'
 import { NButton, NButtonGroup, NIcon } from 'naive-ui'
 import {
+  getVideoInfo,
   parseBilibiliVideoUrl,
   sendEventToBackground,
   showWarning,
@@ -56,6 +57,38 @@ function send() {
   if (parseResult) {
     handleProcessParams()
   }
+}
+
+function sendWithConf() {
+  console.log('sendWithConf')
+
+  // 获取视频信息
+  // bili的 视频元素选择器为 .bpx-player-video-wrap video
+  // ? [ ] 未经过多个页面的验证 存疑
+  getVideoInfo('.bpx-player-video-wrap video', (videoInfo) => {
+    if (videoInfo) {
+      console.log('获取到的视频信息:', videoInfo)
+      handleVideoInfo(videoInfo)
+    } else {
+      showWarning('未找到视频元素，请确保在视频播放页面')
+    }
+  })
+}
+
+// 处理获取到的视频信息
+function handleVideoInfo(videoInfo: any) {
+  console.log('处理视频信息:', videoInfo)
+
+  // 可以根据视频信息更新表单数据
+  if (videoInfo.duration) {
+    formData.value.endTime = Math.floor(videoInfo.duration)
+  }
+
+  // 发送视频信息到后台
+  sendEventToBackground('videoInfo', {
+    ...videoInfo,
+    formData: formData.value,
+  })
 }
 
 // 展开表单处理函数
@@ -170,7 +203,7 @@ function toggleExpand() {
         <NButton
           type="primary"
           size="small"
-          @click="send"
+          @click="sendWithConf"
         >
           添加到播放列表
         </NButton>

@@ -16,6 +16,7 @@ export default defineConfig({
     permissions: [
       'activeTab',
       'storage',
+      'scripting',
     ],
     host_permissions: [
       '*://*.bilibili.com/*', // * 允许访问 Bilibili 域名下的所有 HTTPS 页面
