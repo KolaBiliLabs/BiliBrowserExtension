@@ -1,5 +1,6 @@
 @import './tailwinds.css';
 @plugin "daisyui";
+@import './animate.css';
 
 :root {
   font-family:
@@ -19,5 +20,63 @@
 }
 
 #app {
-  width: 768px;
+  width: 368px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 背景模糊色块 */
+#app::before,
+#app::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.3;
+  z-index: -1;
+}
+
+#app::before {
+  width: 300px;
+  height: 300px;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  top: -150px;
+  right: -150px;
+  animation: float 6s ease-in-out infinite;
+}
+
+#app::after {
+  width: 250px;
+  height: 250px;
+  background: linear-gradient(45deg, #f093fb, #f5576c);
+  bottom: -125px;
+  left: -125px;
+  animation: float 8s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(180deg);
+  }
+}
+
+/* 毛玻璃效果 */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.glass-effect-dark {
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }

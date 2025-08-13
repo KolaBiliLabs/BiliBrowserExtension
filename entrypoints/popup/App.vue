@@ -34,7 +34,12 @@ onMounted(getUrl)
 
 <template>
   <Provider>
-    <NCard title="Kola 插件" class="w-full rounded-none">
+    <NCard
+      :segmented="{ content: true, footer: 'soft' }"
+      title="Kola 插件"
+      class="w-full rounded-none glass-effect"
+      size="small"
+    >
       <template #header-extra>
         <NTag
           v-if="isDev"
@@ -49,20 +54,22 @@ onMounted(getUrl)
       </template>
 
       <template #default>
-        <span v-if="isDev" class="text-xs text-gray-500 block mt-1 text-center mb-2">
-          页面类型: {{ isBilibiliVideo ? 'Bilibili 视频页面' : '非 Bilibili 视频页面' }}
-        </span>
+        <div class="flex-center">
+          <span v-if="isDev" class="text-xs text-gray-400 block mt-1 text-center mb-2 absolute top-2 left-1/2 transform -translate-x-1/2">
+            页面类型: {{ isBilibiliVideo ? 'Bilibili 视频页面' : '非 Bilibili 视频页面' }}
+          </span>
 
-        <Transition mode="out-in" name="fade">
-          <!-- 已连接且是 Bilibili 视频页面 -->
-          <SendToClient v-if="isConnected && isBilibiliVideo" :url="currentUrl" />
+          <Transition mode="out-in" name="fade">
+            <!-- 已连接且是 Bilibili 视频页面 -->
+            <SendToClient v-if="isConnected && isBilibiliVideo" :url="currentUrl" />
 
-          <!-- 已连接但不是 Bilibili 视频页面 -->
-          <NonBilibiliView v-else-if="isConnected && !isBilibiliVideo" :url="currentUrl" />
+            <!-- 已连接但不是 Bilibili 视频页面 -->
+            <NonBilibiliView v-else-if="isConnected && !isBilibiliVideo" :url="currentUrl" />
 
-          <!-- 未连接 -->
-          <UnlinkView v-else />
-        </Transition>
+            <!-- 未连接 -->
+            <UnlinkView v-else />
+          </Transition>
+        </div>
       </template>
 
       <template #footer>
