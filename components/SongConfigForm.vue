@@ -36,10 +36,6 @@ const formData = computed({
 // 视频选择器
 const videoSelector = computed(() => props.videoSelector || DEFAULT_VIDEO_SELECTOR)
 
-// 是否正在拖动滑块
-const isDragging = ref(false)
-// 拖动时的临时时间值
-const dragTime = ref(0)
 // 视频最大时长
 const maxDuration = ref(600)
 
@@ -76,44 +72,27 @@ function updateVideoDuration() {
   })
 }
 
-// 滑块开始拖动
-function onSliderStart(value: number, type: 'start' | 'end') {
-  isDragging.value = true
-  dragTime.value = value
-  console.log(`开始拖动${type === 'start' ? '开始' : '结束'}时间滑块:`, value)
-
-  // 设置视频时间戳进行预览
-  setVideoTimeStamp(value)
-}
-
 // 防抖定时器
 let debounceTimer: NodeJS.Timeout | null = null
 
-// 滑块拖动中
+// 滑块更新时触发
 function onSliderUpdate(value: number, type: 'start' | 'end') {
-  if (isDragging.value) {
-    dragTime.value = value
-    console.log(`拖动${type === 'start' ? '开始' : '结束'}时间滑块:`, value)
+  console.log(`拖动${type === 'start' ? '开始' : '结束'}时间滑块:`, value)
 
-    // 防抖处理，避免频繁设置视频时间
-    if (debounceTimer) {
-      clearTimeout(debounceTimer)
-    }
-
-    debounceTimer = setTimeout(() => {
-      setVideoTimeStamp(value)
-    }, 100) // 100ms 防抖延迟
+  if (type === 'start') {
+    formData.value.startTime = Math.min(value, formData.value.endTime - 1)
+  } else {
+    formData.value.endTime = Math.max(value, formData.value.startTime + 1)
   }
-}
 
-// 滑块结束拖动
-function onSliderEnd(value: number, type: 'start' | 'end') {
-  isDragging.value = false
-  dragTime.value = 0
-  console.log(`结束拖动${type === 'start' ? '开始' : '结束'}时间滑块:`, value)
+  // 防抖处理，避免频繁设置视频时间
+  if (debounceTimer) {
+    clearTimeout(debounceTimer)
+  }
 
-  // 最终设置视频时间戳
-  setVideoTimeStamp(value)
+  debounceTimer = setTimeout(() => {
+    setVideoTimeStamp(type === 'start' ? formData.value.startTime : formData.value.endTime)
+  }, 100) // 100ms 防抖延迟
 }
 
 // 组件挂载时获取视频时长
@@ -151,40 +130,35 @@ onMounted(() => {
     <!-- 时间范围滑块 -->
     <div class=" space-y-4">
       <!-- 开始时间滑块 -->
-      <div class="space-y-2 slider-container-glass" :class="{ dragging: isDragging }">
+      <div class="space-y-2 slider-container-glass">
         <div class="flex-between">
           <span class="text-xs text-white/70">开始时间</span>
           <span class="text-xs text-white/90 font-mono">{{ formatTime(formData.startTime) }}</span>
         </div>
         <NSlider
-          v-model:value="formData.startTime"
+          :value="formData.startTime"
           :min="0"
           :max="maxDuration"
           :step="1"
           :tooltip="false"
-          class="custom-slider"
-          @mousedown="onSliderStart(formData.startTime, 'start')"
           @update:value="onSliderUpdate($event, 'start')"
-          @mouseup="onSliderEnd(formData.startTime, 'start')"
         />
       </div>
 
       <!-- 结束时间滑块 -->
-      <div class="space-y-2 slider-container-glass" :class="{ dragging: isDragging }">
+      <div class="space-y-2 slider-container-glass">
         <div class="flex items-center justify-between">
           <span class="text-xs text-white/70">结束时间</span>
           <span class="text-xs text-white/90 font-mono">{{ formatTime(formData.endTime) }}</span>
         </div>
 
         <NSlider
-          v-model:value="formData.endTime"
+          :value="formData.endTime"
           :min="0"
           :max="maxDuration"
           :step="1"
           :tooltip="false"
-          @mousedown="onSliderStart(formData.endTime, 'end')"
           @update:value="onSliderUpdate($event, 'end')"
-          @mouseup="onSliderEnd(formData.endTime, 'end')"
         />
       </div>
 

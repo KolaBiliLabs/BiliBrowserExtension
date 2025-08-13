@@ -1,13 +1,5 @@
+import type { LinkConfig } from './app'
 import { CirclePercentIcon, GithubIcon } from 'lucide-vue-next'
-
-// 定义链接配置接口
-export interface LinkConfig {
-  key: string
-  url: string
-  text: string
-  title: string
-  icon: any
-}
 
 // 视频选择器常量
 export const VIDEO_SELECTORS = {
@@ -21,6 +13,16 @@ export const VIDEO_SELECTORS = {
 
 // 默认视频选择器
 export const DEFAULT_VIDEO_SELECTOR = VIDEO_SELECTORS.BILIBILI
+
+// ==================== 数据格式定义 ====================
+
+// 消息类型常量
+export const MESSAGE_TYPES = {
+  SEND_PARAMS: 'sendParamsToBackground',
+  VIDEO_INFO: 'videoInfo',
+  SONG_CONFIG: 'songConfig',
+  SEND_TO_ELECTRON: 'sendDataToElectron',
+} as const
 
 // 链接配置
 export const INFO_LINKS: LinkConfig[] = [

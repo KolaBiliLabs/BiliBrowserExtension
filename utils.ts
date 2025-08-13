@@ -1,4 +1,4 @@
-import type { SendMessageResponse } from './app'
+import type { ElectronMessageData, PageTypeInfo, SendMessageResponse } from './app'
 
 // ==================== 连接相关工具函数 ====================
 
@@ -131,15 +131,6 @@ export function getPageTypeDescription(url: string): string {
 }
 
 // ==================== 页面类型信息工具函数 ====================
-
-/**
- * 页面类型信息接口
- */
-export interface PageTypeInfo {
-  icon: any
-  color: 'info' | 'warning' | 'error' | 'success'
-  message: string
-}
 
 /**
  * 获取页面类型对应的图标和颜色
@@ -369,4 +360,81 @@ export function getVideoCurrentTime(
       callback(results?.[0]?.result || null)
     })
   })
+}
+
+// ==================== 数据构建工具函数 ====================
+
+/**
+ * 构建发送到 Electron 的统一数据格式
+ * @returns 统一格式的数据
+ */
+export function buildElectronMessageData(
+  params: Record<string, any>,
+  videoInfo: any,
+  songInfo: {
+    name: string
+    startTime: number
+    endTime: number
+  },
+  metadata?: Record<string, any>,
+): ElectronMessageData {
+  return {
+    // 基础信息
+    timestamp: Date.now(),
+    source: 'browser-extension',
+    version: '1.0.0',
+
+    // URL 参数信息
+    params: {
+      bvId: params.bvId,
+      ...params,
+    },
+
+    // 视频信息
+    video: {
+      title: videoInfo.title || '',
+      url: videoInfo.url || '',
+      currentTime: videoInfo.currentTime || 0,
+      duration: videoInfo.duration || 0,
+      paused: videoInfo.paused || true,
+      src: videoInfo.src || '',
+      videoWidth: videoInfo.videoWidth || 0,
+      videoHeight: videoInfo.videoHeight || 0,
+      readyState: videoInfo.readyState || 0,
+    },
+
+    // 自定义歌曲信息
+    song: {
+      name: songInfo.name || '',
+      startTime: songInfo.startTime || 0,
+      endTime: songInfo.endTime || 0,
+    },
+
+    // 扩展信息
+    metadata: metadata || {},
+  }
+}
+
+/**
+ * 发送统一格式的数据到 Electron
+ */
+export async function sendUnifiedDataToElectron(
+  params: Record<string, any>,
+  videoInfo: any,
+  songInfo: {
+    name: string
+    startTime: number
+    endTime: number
+  },
+  metadata?: Record<string, any>,
+) {
+  const unifiedData = buildElectronMessageData(params, videoInfo, songInfo, metadata)
+
+  try {
+    await sendEventToBackground('sendUnifiedDataToElectron', unifiedData)
+    return { success: true, data: unifiedData }
+  } catch (error) {
+    console.error('发送统一数据到 Electron 失败:', error)
+    return { success: false, error }
+  }
 }

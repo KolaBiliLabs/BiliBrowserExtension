@@ -6,6 +6,7 @@ import {
   getVideoInfo,
   parseBilibiliVideoUrl,
   sendEventToBackground,
+  sendUnifiedDataToElectron,
   showWarning,
 } from '@/utils'
 import SongConfigForm from './SongConfigForm.vue'
@@ -43,13 +44,40 @@ function handleParseUrl() {
 }
 
 // 处理参数发送
-function handleProcessParams() {
+async function handleProcessParams() {
   if (!Object.keys(urlParams.value).length) {
     showWarning('没有可处理的参数。请先解析URL。')
     return
   }
 
-  sendEventToBackground('sendParamsToBackground', urlParams.value)
+  // 获取视频信息
+  getVideoInfo(DEFAULT_VIDEO_SELECTOR, (videoInfo) => {
+    if (videoInfo) {
+      // 使用统一的数据格式发送
+      sendUnifiedDataToElectron(
+        urlParams.value,
+        videoInfo,
+        {
+          name: formData.value.songName,
+          startTime: formData.value.startTime,
+          endTime: formData.value.endTime,
+        },
+        {
+          action: 'sendParams',
+          source: 'popup',
+        },
+      ).then((result) => {
+        if (result.success) {
+          console.log('统一数据发送成功:', result.data)
+        } else {
+          console.error('统一数据发送失败:', result.error)
+        }
+      })
+    } else {
+      // 如果没有视频信息，仍然发送参数
+      sendEventToBackground('sendParamsToBackground', urlParams.value)
+    }
+  })
 }
 
 // 主要发送函数
@@ -84,10 +112,25 @@ function handleVideoInfo(videoInfo: any) {
     formData.value.endTime = Math.floor(videoInfo.duration)
   }
 
-  // 发送视频信息到后台
-  sendEventToBackground('videoInfo', {
-    ...videoInfo,
-    formData: formData.value,
+  // 使用统一的数据格式发送
+  sendUnifiedDataToElectron(
+    urlParams.value,
+    videoInfo,
+    {
+      name: formData.value.songName,
+      startTime: formData.value.startTime,
+      endTime: formData.value.endTime,
+    },
+    {
+      action: 'videoInfo',
+      source: 'popup',
+    },
+  ).then((result) => {
+    if (result.success) {
+      console.log('视频信息统一数据发送成功:', result.data)
+    } else {
+      console.error('视频信息统一数据发送失败:', result.error)
+    }
   })
 }
 
@@ -137,32 +180,6 @@ function saveFormData() {
     })
   } catch (error) {
     console.error('保存表单数据失败:', error)
-  }
-}
-
-// 从本地存储加载表单数据
-function _loadFormData() {
-  try {
-    chrome.storage.local.get(['formData'], (result) => {
-      if (result.formData) {
-        const savedData = result.formData
-        formData.value.songName = savedData.songName || ''
-        formData.value.startTime = savedData.startTime || 0
-        formData.value.endTime = savedData.endTime || 0
-        console.log('已从本地存储加载表单数据')
-      }
-    })
-  } catch (error) {
-    console.error('加载表单数据失败:', error)
-  }
-}
-
-// 清理表单数据
-function _clearFormData() {
-  formData.value = {
-    songName: '',
-    startTime: 0,
-    endTime: 0,
   }
 }
 
