@@ -2,6 +2,7 @@
 import { CogIcon, XIcon } from 'lucide-vue-next'
 import { NButton, NButtonGroup, NIcon } from 'naive-ui'
 import { DEFAULT_VIDEO_SELECTOR } from '@/constants'
+import { useExpandedState } from '@/hooks/useExpandedState'
 import {
   getVideoInfo,
   parseBilibiliVideoUrl,
@@ -15,7 +16,9 @@ const { url } = defineProps<{
 }>()
 
 const urlParams = ref<Record<string, string>>({})
-const isExpanded = ref(false)
+
+// 使用展开状态 hook
+const { isExpanded, setExpanded } = useExpandedState('sendToClientExpanded', false)
 
 // 表单数据
 const formData = ref({
@@ -136,7 +139,7 @@ function handleVideoInfo(videoInfo: any) {
 // 展开表单处理函数
 function handleExpand() {
   console.log('展开表单配置')
-  isExpanded.value = true
+  setExpanded(true)
 
   // 展开时的处理逻辑
   // 1. 解析当前 URL 参数
@@ -150,7 +153,7 @@ function handleExpand() {
 // 关闭表单处理函数
 function handleCollapse() {
   console.log('关闭表单配置')
-  isExpanded.value = false
+  setExpanded(false)
 
   // 关闭时的处理逻辑
   // 1. 保存当前配置到本地存储

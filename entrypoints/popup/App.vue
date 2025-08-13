@@ -7,7 +7,7 @@ import NonBilibiliView from '@/components/NonBilibiliView.vue'
 import Provider from '@/components/Provider.vue'
 import SendToClient from '@/components/SendToClient.vue'
 import UnlinkView from '@/components/UnlinkView.vue'
-import { useIsDev } from '@/hooks'
+import { useIsDev } from '@/hooks/useIsDev'
 import { getCurrentTabUrl, isBilibiliVideoPage } from '~/utils'
 
 const { isDev } = useIsDev()
