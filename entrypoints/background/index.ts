@@ -1,4 +1,5 @@
 import type { Socket } from 'socket.io-client'
+import type { ElectronMessageData } from '~/app'
 import { io } from 'socket.io-client'
 
 // 定义 Socket.IO 服务器的地址和端口
@@ -97,9 +98,66 @@ export default defineBackground({
           // 必须返回 true 来指示你将异步地调用 sendResponse
           return true
         }
-        case 'OTHER_EVENT': {
-          console.log('收到其他事件:', payload)
-          sendResponse({ status: 'acknowledged', message: '收到其他事件。' })
+
+        case 'sendUnifiedDataToElectron': {
+          const unifiedData: ElectronMessageData = payload
+          console.log('后台脚本正在处理统一格式数据:', unifiedData)
+
+          // 验证数据格式
+          if (!validateUnifiedData(unifiedData)) {
+            console.error('统一数据格式验证失败')
+            sendResponse({ status: 'error', message: '数据格式验证失败' })
+            return true
+          }
+
+          // 记录详细日志
+          logUnifiedData(unifiedData)
+
+          if (socket && socket.connected) {
+            // 发送统一格式的数据到 Electron
+            sendDataToElectron('unifiedDataToElectron', unifiedData)
+            sendResponse({
+              status: 'success',
+              message: '统一格式数据已发送到 Electron 服务器。',
+              data: {
+                timestamp: unifiedData.timestamp,
+                bvId: unifiedData.params.bvId,
+                songName: unifiedData.song.name,
+                action: unifiedData.metadata?.action,
+              },
+            })
+          } else {
+            sendResponse({ status: 'error', message: 'Socket.IO 未连接，无法发送统一格式数据。' })
+          }
+
+          return true
+        }
+
+        case 'videoInfo': {
+          const videoData = payload
+          console.log('后台脚本正在处理视频信息:', videoData)
+
+          if (socket && socket.connected) {
+            sendDataToElectron('videoInfoToElectron', videoData)
+            sendResponse({ status: 'success', message: '视频信息已发送到 Electron 服务器。' })
+          } else {
+            sendResponse({ status: 'error', message: 'Socket.IO 未连接，无法发送视频信息。' })
+          }
+
+          return true
+        }
+
+        case 'songConfig': {
+          const songData = payload
+          console.log('后台脚本正在处理歌曲配置:', songData)
+
+          if (socket && socket.connected) {
+            sendDataToElectron('songConfigToElectron', songData)
+            sendResponse({ status: 'success', message: '歌曲配置已发送到 Electron 服务器。' })
+          } else {
+            sendResponse({ status: 'error', message: 'Socket.IO 未连接，无法发送歌曲配置。' })
+          }
+
           return true
         }
 
@@ -117,6 +175,7 @@ export default defineBackground({
         }
 
         default: {
+          console.log('未知消息类型:', type)
           return false
         }
       }
@@ -137,4 +196,32 @@ export function sendDataToElectron(event: string, data: any) {
   } else {
     console.warn(`Socket.IO 未连接，无法发送事件 '${event}'。`)
   }
+}
+
+// 验证统一数据格式的辅助函数
+function validateUnifiedData(data: any): data is ElectronMessageData {
+  return (
+    data
+    && typeof data.timestamp === 'number'
+    && data.source === 'browser-extension'
+    && typeof data.version === 'string'
+    && data.params
+    && data.video
+    && data.song
+  )
+}
+
+// 记录统一数据日志的辅助函数
+function logUnifiedData(data: ElectronMessageData) {
+  console.log('=== 统一数据格式日志 ===')
+  console.log('时间戳:', new Date(data.timestamp).toLocaleString())
+  console.log('来源:', data.source)
+  console.log('版本:', data.version)
+  console.log('BV ID:', data.params.bvId)
+  console.log('歌曲名称:', data.song.name)
+  console.log('时间范围:', `${data.song.startTime}s - ${data.song.endTime}s`)
+  console.log('视频标题:', data.video.title)
+  console.log('视频时长:', data.video.duration)
+  console.log('操作类型:', data.metadata?.action)
+  console.log('========================')
 }
