@@ -211,6 +211,10 @@ export function showWarning(message: string) {
   window.$message.warning(message)
 }
 
+export function showSuccess(message: string) {
+  window.$message.success(message)
+}
+
 // ==================== 格式化工具函数 ====================
 
 // 格式化链接显示文本

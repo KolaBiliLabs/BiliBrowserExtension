@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { NInput, NSlider } from 'naive-ui'
-import { DEFAULT_VIDEO_SELECTOR } from '@/constants'
-import { setVideoTime, getVideoCurrentTime, getVideoInfo } from '@/utils'
 import { onMounted } from 'vue'
+import { DEFAULT_VIDEO_SELECTOR } from '@/constants'
+import { getVideoInfo, setVideoTime } from '@/utils'
 
 // 定义表单数据接口
 interface FormData {
@@ -61,22 +61,13 @@ function setVideoTimeStamp(time: number) {
   })
 }
 
-// 获取视频当前时间
-function getCurrentVideoTime() {
-  getVideoCurrentTime(videoSelector.value, (time) => {
-    if (time !== null) {
-      console.log('当前视频时间:', time)
-    }
-  })
-}
-
 // 获取视频时长并更新最大时长
 function updateVideoDuration() {
   getVideoInfo(videoSelector.value, (videoInfo) => {
     if (videoInfo && videoInfo.duration) {
       maxDuration.value = Math.ceil(videoInfo.duration)
       console.log('视频时长更新为:', maxDuration.value)
-      
+
       // 如果结束时间超过新的最大时长，则调整
       if (formData.value.endTime > maxDuration.value) {
         formData.value.endTime = maxDuration.value
@@ -90,7 +81,7 @@ function onSliderStart(value: number, type: 'start' | 'end') {
   isDragging.value = true
   dragTime.value = value
   console.log(`开始拖动${type === 'start' ? '开始' : '结束'}时间滑块:`, value)
-  
+
   // 设置视频时间戳进行预览
   setVideoTimeStamp(value)
 }
@@ -103,12 +94,12 @@ function onSliderUpdate(value: number, type: 'start' | 'end') {
   if (isDragging.value) {
     dragTime.value = value
     console.log(`拖动${type === 'start' ? '开始' : '结束'}时间滑块:`, value)
-    
+
     // 防抖处理，避免频繁设置视频时间
     if (debounceTimer) {
       clearTimeout(debounceTimer)
     }
-    
+
     debounceTimer = setTimeout(() => {
       setVideoTimeStamp(value)
     }, 100) // 100ms 防抖延迟
@@ -120,7 +111,7 @@ function onSliderEnd(value: number, type: 'start' | 'end') {
   isDragging.value = false
   dragTime.value = 0
   console.log(`结束拖动${type === 'start' ? '开始' : '结束'}时间滑块:`, value)
-  
+
   // 最终设置视频时间戳
   setVideoTimeStamp(value)
 }

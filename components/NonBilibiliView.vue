@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { Info, VideoOff } from 'lucide-vue-next'
-import { NAlert, NButton, NIcon, NSpace } from 'naive-ui'
+import { NButton, NIcon } from 'naive-ui'
 import {
-  copyToClipboard,
   getPageTypeDescription,
   getPageTypeInfo,
   goToBilibili,
+  showSuccess,
 } from '~/utils'
 
 const { url } = defineProps<{
@@ -34,7 +34,8 @@ const pageInfo = computed(() => getPageTypeInfoWithIcon(pageType.value))
 
 // 复制当前页面 URL
 function copyCurrentUrl() {
-  copyToClipboard(url, '页面链接已复制到剪贴板', '复制失败')
+  navigator.clipboard.writeText(url)
+  showSuccess('页面链接已复制到剪贴板')
 }
 </script>
 
@@ -47,8 +48,12 @@ function copyCurrentUrl() {
           <component :is="pageInfo.icon" />
         </NIcon>
       </div>
-      <h3 class="text-lg font-semibold text-white mb-2">{{ pageType }}</h3>
-      <p class="text-gray-300 text-sm">{{ pageInfo.message }}</p>
+      <h3 class="text-lg font-semibold text-white mb-2">
+        {{ pageType }}
+      </h3>
+      <p class="text-gray-300 text-sm">
+        {{ pageInfo.message }}
+      </p>
     </div>
 
     <!-- 按钮组 -->
