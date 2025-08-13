@@ -17,8 +17,8 @@ const { url } = defineProps<{
 
 const urlParams = ref<Record<string, string>>({})
 
-// 使用展开状态 hook
-const { isExpanded, setExpanded } = useExpandedState('sendToClientExpanded', false)
+// 使用展开状态 hook（带防抖）
+const { isExpanded, setExpanded, isTransitioning } = useExpandedState('sendToClientExpanded', false, 300)
 
 // 表单数据
 const formData = ref({
@@ -193,10 +193,45 @@ function toggleExpand() {
     handleExpand()
   }
 }
+
+// Transition 事件处理函数
+function onBeforeEnter(el: Element) {
+  // 确保元素在动画开始前处于正确状态
+  (el as HTMLElement).style.opacity = '0'
+  ;(el as HTMLElement).style.transform = 'translateY(-10px) scale(0.95)'
+}
+
+function onEnter(el: Element, done: () => void) {
+  // 强制重绘
+  ;(el as HTMLElement).offsetHeight
+  
+  // 设置最终状态
+  ;(el as HTMLElement).style.opacity = '1'
+  ;(el as HTMLElement).style.transform = 'translateY(0) scale(1)'
+  
+  // 动画完成后调用 done
+  setTimeout(done, 300)
+}
+
+function onLeave(el: Element, done: () => void) {
+  // 设置离开状态
+  ;(el as HTMLElement).style.opacity = '0'
+  ;(el as HTMLElement).style.transform = 'translateY(10px) scale(0.95)'
+  
+  // 动画完成后调用 done
+  setTimeout(done, 300)
+}
 </script>
 
 <template>
-  <Transition name="slide" mode="out-in">
+  <Transition 
+    name="slide" 
+    mode="out-in"
+    :duration="{ enter: 300, leave: 300 }"
+    @before-enter="onBeforeEnter"
+    @enter="onEnter"
+    @leave="onLeave"
+  >
     <!-- 按钮区域 -->
     <NButtonGroup v-if="!isExpanded">
       <NButton
@@ -208,9 +243,10 @@ function toggleExpand() {
       <NButton
         type="default"
         class="rounded-r-lg border-0 bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm"
+        :disabled="isTransitioning"
         @click="toggleExpand"
       >
-        <NIcon size="16">
+        <NIcon size="16" :class="{ 'animate-spin': isTransitioning }">
           <CogIcon />
         </NIcon>
       </NButton>
@@ -229,9 +265,10 @@ function toggleExpand() {
         <NButton
           type="default"
           size="small"
+          :disabled="isTransitioning"
           @click="toggleExpand"
         >
-          <XIcon class="size-4" />
+          <XIcon class="size-4" :class="{ 'animate-pulse': isTransitioning }" />
         </NButton>
       </header>
 
@@ -280,5 +317,40 @@ function toggleExpand() {
   100% {
     left: 100%;
   }
+}
+
+/* ==================== Transition 动画样式 ==================== */
+
+/* 进入动画 */
+.slide-enter-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 进入前状态 */
+.slide-enter-from {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+}
+
+/* 离开后状态 */
+.slide-leave-to {
+  opacity: 0;
+  transform: translateY(10px) scale(0.95);
+}
+
+/* 确保元素在动画期间保持可见 */
+.slide-enter-to,
+.slide-leave-from {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* 防止闪烁的额外样式 */
+.slide-move {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 </style>
