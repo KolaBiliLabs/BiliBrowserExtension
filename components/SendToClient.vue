@@ -216,7 +216,10 @@ function toggleExpand() {
         </NButton>
       </header>
 
-      <SongConfigForm v-model="formData" />
+      <SongConfigForm
+        v-model="formData"
+        video-selector=".bpx-player-video-wrap video"
+      />
     </div>
   </Transition>
 </template>

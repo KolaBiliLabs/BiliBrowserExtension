@@ -666,3 +666,145 @@ export function queryDOMWithOptions(
     })
   })
 }
+
+/**
+ * 设置视频时间戳
+ * @param cssSelector 视频元素选择器
+ * @param time 时间戳（秒）
+ * @param callback 回调函数
+ */
+export function setVideoTime(
+  cssSelector: string = 'video',
+  time: number,
+  callback?: (success: boolean) => void,
+): void {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (!tabs[0] || !tabs[0].id) {
+      console.error('无法获取当前标签页')
+      callback?.(false)
+      return
+    }
+
+    const tabId = tabs[0].id
+
+    chrome.scripting.executeScript({
+      target: { tabId },
+      func: (selector: string, targetTime: number) => {
+        const videoElement = document.querySelector(selector) as HTMLVideoElement
+        if (videoElement) {
+          try {
+            videoElement.currentTime = targetTime
+            return true
+          } catch (error) {
+            console.error('设置视频时间失败:', error)
+            return false
+          }
+        }
+        return false
+      },
+      args: [cssSelector, time],
+    }, (results) => {
+      if (chrome.runtime.lastError) {
+        console.error('执行脚本失败:', chrome.runtime.lastError)
+        callback?.(false)
+        return
+      }
+
+      const success = results?.[0]?.result || false
+      callback?.(success)
+    })
+  })
+}
+
+/**
+ * 获取视频当前时间
+ * @param cssSelector 视频元素选择器
+ * @param callback 回调函数
+ */
+export function getVideoCurrentTime(
+  cssSelector: string = 'video',
+  callback: (time: number | null) => void,
+): void {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (!tabs[0] || !tabs[0].id) {
+      console.error('无法获取当前标签页')
+      callback(null)
+      return
+    }
+
+    const tabId = tabs[0].id
+
+    chrome.scripting.executeScript({
+      target: { tabId },
+      func: (selector: string) => {
+        const videoElement = document.querySelector(selector) as HTMLVideoElement
+        if (videoElement) {
+          return videoElement.currentTime
+        }
+        return null
+      },
+      args: [cssSelector],
+    }, (results) => {
+      if (chrome.runtime.lastError) {
+        console.error('执行脚本失败:', chrome.runtime.lastError)
+        callback(null)
+        return
+      }
+
+      callback(results?.[0]?.result || null)
+    })
+  })
+}
+
+/**
+ * 播放/暂停视频
+ * @param cssSelector 视频元素选择器
+ * @param play 是否播放
+ * @param callback 回调函数
+ */
+export function toggleVideoPlay(
+  cssSelector: string = 'video',
+  play: boolean = true,
+  callback?: (success: boolean) => void,
+): void {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (!tabs[0] || !tabs[0].id) {
+      console.error('无法获取当前标签页')
+      callback?.(false)
+      return
+    }
+
+    const tabId = tabs[0].id
+
+    chrome.scripting.executeScript({
+      target: { tabId },
+      func: (selector: string, shouldPlay: boolean) => {
+        const videoElement = document.querySelector(selector) as HTMLVideoElement
+        if (videoElement) {
+          try {
+            if (shouldPlay) {
+              videoElement.play()
+            } else {
+              videoElement.pause()
+            }
+            return true
+          } catch (error) {
+            console.error('控制视频播放失败:', error)
+            return false
+          }
+        }
+        return false
+      },
+      args: [cssSelector, play],
+    }, (results) => {
+      if (chrome.runtime.lastError) {
+        console.error('执行脚本失败:', chrome.runtime.lastError)
+        callback?.(false)
+        return
+      }
+
+      const success = results?.[0]?.result || false
+      callback?.(success)
+    })
+  })
+}
