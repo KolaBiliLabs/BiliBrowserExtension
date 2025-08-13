@@ -1,4 +1,5 @@
 import type { ElectronMessageData, PageTypeInfo, SendMessageResponse } from './app'
+import { MESSAGE_TYPES } from './constants'
 
 // ==================== 连接相关工具函数 ====================
 
@@ -7,7 +8,7 @@ import type { ElectronMessageData, PageTypeInfo, SendMessageResponse } from './a
  * @param callback 连接状态回调函数
  */
 export async function sendCheckConnection(callback: (connected: boolean) => void) {
-  const eventType = 'checkConnection'
+  const eventType = MESSAGE_TYPES.CHECK_CONNECTION
   const response: SendMessageResponse<{ isConnected: boolean }> = await chrome.runtime.sendMessage({
     type: eventType,
   })
@@ -431,7 +432,7 @@ export async function sendUnifiedDataToElectron(
   const unifiedData = buildElectronMessageData(params, videoInfo, songInfo, metadata)
 
   try {
-    await sendEventToBackground('sendUnifiedDataToElectron', unifiedData)
+    await sendEventToBackground(MESSAGE_TYPES.SEND_UNIFIED_DATA, unifiedData)
     return { success: true, data: unifiedData }
   } catch (error) {
     console.error('发送统一数据到 Electron 失败:', error)

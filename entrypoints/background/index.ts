@@ -1,6 +1,7 @@
 import type { Socket } from 'socket.io-client'
 import type { ElectronMessageData } from '~/app'
 import { io } from 'socket.io-client'
+import { MESSAGE_TYPES } from '~/constants'
 
 // 定义 Socket.IO 服务器的地址和端口
 // 确保与 Electron 客户端监听的地址和端口一致
@@ -30,7 +31,7 @@ function connectSocketServer() {
   socket.on('connect', () => {
     console.log('Socket.IO 客户端已成功连接到 Electron 服务器！Socket ID:', socket?.id)
     // 连接成功后，可以立即发送一些身份信息
-    socket?.emit('browserPluginConnected', {
+    socket?.emit(MESSAGE_TYPES.BROWSER_PLUGIN_CONNECTED, {
       message: 'Hello Electron! This is the Bilibili Helper plugin.',
       browser: 'chrome', // 或者根据实际浏览器判断
     })
@@ -52,7 +53,7 @@ function connectSocketServer() {
   })
 
   // 监听来自服务器的自定义事件（例如，Electron 服务器发送的数据）
-  socket.on('dataFromElectron', (data: any) => {
+  socket.on(MESSAGE_TYPES.DATA_FROM_ELECTRON, (data: any) => {
     console.log('从 Electron 服务器收到数据:', data)
     // 在这里处理来自 Electron 的数据，例如更新插件状态、向内容脚本发送消息等
     // 例：向所有内容脚本发送消息
@@ -66,7 +67,7 @@ function connectSocketServer() {
   })
 
   // 监听 Electron 服务器发出的确认消息
-  socket.on('dataReceivedAck', (data) => {
+  socket.on(MESSAGE_TYPES.DATA_RECEIVED_ACK, (data) => {
     console.log('收到 Electron 服务器的确认:', data)
   })
 }
@@ -84,12 +85,12 @@ export default defineBackground({
       console.log('后台脚本收到消息: 消息类型为=> ', type)
 
       switch (type) {
-        case 'sendParamsToBackground': {
+        case MESSAGE_TYPES.SEND_PARAMS: {
           const params = payload
           console.log('后台脚本正在处理从 Popup 接收到的 URL 参数:', params)
 
           if (socket && socket.connected) {
-            sendDataToElectron('sendDataToElectron', params)
+            sendDataToElectron(MESSAGE_TYPES.SEND_TO_ELECTRON, params)
             sendResponse({ status: 'success', message: '参数已发送到 Electron 服务器。' })
           } else {
             sendResponse({ status: 'error', message: 'Socket.IO 未连接，无法发送参数。' })
@@ -99,7 +100,7 @@ export default defineBackground({
           return true
         }
 
-        case 'sendUnifiedDataToElectron': {
+        case MESSAGE_TYPES.SEND_UNIFIED_DATA: {
           const unifiedData: ElectronMessageData = payload
           console.log('后台脚本正在处理统一格式数据:', unifiedData)
 
@@ -115,7 +116,7 @@ export default defineBackground({
 
           if (socket && socket.connected) {
             // 发送统一格式的数据到 Electron
-            sendDataToElectron('unifiedDataToElectron', unifiedData)
+            sendDataToElectron(MESSAGE_TYPES.UNIFIED_DATA_TO_ELECTRON, unifiedData)
             sendResponse({
               status: 'success',
               message: '统一格式数据已发送到 Electron 服务器。',
@@ -133,12 +134,12 @@ export default defineBackground({
           return true
         }
 
-        case 'videoInfo': {
+        case MESSAGE_TYPES.VIDEO_INFO: {
           const videoData = payload
           console.log('后台脚本正在处理视频信息:', videoData)
 
           if (socket && socket.connected) {
-            sendDataToElectron('videoInfoToElectron', videoData)
+            sendDataToElectron(MESSAGE_TYPES.VIDEO_INFO_TO_ELECTRON, videoData)
             sendResponse({ status: 'success', message: '视频信息已发送到 Electron 服务器。' })
           } else {
             sendResponse({ status: 'error', message: 'Socket.IO 未连接，无法发送视频信息。' })
@@ -147,12 +148,12 @@ export default defineBackground({
           return true
         }
 
-        case 'songConfig': {
+        case MESSAGE_TYPES.SONG_CONFIG: {
           const songData = payload
           console.log('后台脚本正在处理歌曲配置:', songData)
 
           if (socket && socket.connected) {
-            sendDataToElectron('songConfigToElectron', songData)
+            sendDataToElectron(MESSAGE_TYPES.SONG_CONFIG_TO_ELECTRON, songData)
             sendResponse({ status: 'success', message: '歌曲配置已发送到 Electron 服务器。' })
           } else {
             sendResponse({ status: 'error', message: 'Socket.IO 未连接，无法发送歌曲配置。' })
@@ -161,7 +162,7 @@ export default defineBackground({
           return true
         }
 
-        case 'checkConnection': {
+        case MESSAGE_TYPES.CHECK_CONNECTION: {
           const isConnected = socket?.connected
           sendResponse({ status: 'success', message: '检测成功', data: { isConnected } })
 

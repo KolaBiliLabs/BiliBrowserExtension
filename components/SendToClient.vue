@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { CogIcon, XIcon } from 'lucide-vue-next'
 import { NButton, NButtonGroup, NIcon } from 'naive-ui'
-import { DEFAULT_VIDEO_SELECTOR } from '@/constants'
+import { DEFAULT_VIDEO_SELECTOR, MESSAGE_TYPES } from '@/constants'
 import {
   getVideoInfo,
   parseBilibiliVideoUrl,
@@ -75,7 +75,7 @@ async function handleProcessParams() {
       })
     } else {
       // 如果没有视频信息，仍然发送参数
-      sendEventToBackground('sendParamsToBackground', urlParams.value)
+      sendEventToBackground(MESSAGE_TYPES.SEND_PARAMS, urlParams.value)
     }
   })
 }
