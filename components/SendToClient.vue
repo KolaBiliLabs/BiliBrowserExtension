@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CogIcon } from 'lucide-vue-next'
+import { CogIcon, XIcon } from 'lucide-vue-next'
 import { NButton, NButtonGroup, NIcon } from 'naive-ui'
 import {
   parseBilibiliVideoUrl,
@@ -19,7 +19,7 @@ const isExpanded = ref(false)
 const formData = ref({
   songName: '',
   startTime: 0,
-  endTime: 0,
+  endTime: 600,
 })
 
 // 解析 URL 参数
@@ -144,46 +144,61 @@ function toggleExpand() {
 </script>
 
 <template>
-  <div
-    class="transition-all duration-300 ease-in-out rounded-lg overflow-hidden"
-  >
+  <Transition name="slide" mode="out-in">
     <!-- 按钮区域 -->
-    <div class="flex justify-center items-center py-2">
-      <NButtonGroup>
+    <NButtonGroup v-if="!isExpanded">
+      <NButton
+        type="primary"
+        @click="send"
+      >
+        添加到播放列表
+      </NButton>
+      <NButton
+        type="default"
+        class="rounded-r-lg border-0 bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm"
+        @click="toggleExpand"
+      >
+        <NIcon size="16">
+          <CogIcon />
+        </NIcon>
+      </NButton>
+    </NButtonGroup>
+
+    <div v-else class="flex-1 flex-col-center form-container-glass p-4 gap-4">
+      <header class="flex-between w-full">
+        <!-- 按钮 -->
         <NButton
           type="primary"
-          :class="{ 'expanded-button': isExpanded }"
+          size="small"
           @click="send"
         >
           添加到播放列表
         </NButton>
         <NButton
           type="default"
-          tertiary
-          :class="{ 'expanded-button': isExpanded }"
+          size="small"
           @click="toggleExpand"
         >
-          <NIcon size="14">
-            <CogIcon />
-          </NIcon>
+          <XIcon class="size-4" />
         </NButton>
-      </NButtonGroup>
-    </div>
+      </header>
 
-    <!-- 可展开的表单区域 -->
-    <div
-      class="transition-all duration-300 ease-in-out overflow-hidden"
-      :class="{
-        'max-h-0 opacity-0': !isExpanded,
-        'max-h-80 opacity-100 mt-4': isExpanded,
-      }"
-    >
       <SongConfigForm v-model="formData" />
     </div>
-  </div>
+  </Transition>
 </template>
 
 <style scoped>
+/* 表单容器样式 */
+.form-container-glass {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  /* box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); */
+}
+
 /* 展开按钮的条纹扫过动画效果 */
 .expanded-button {
   background: linear-gradient(45deg, #3b82f6, #1d4ed8) !important;
