@@ -13,14 +13,14 @@ export interface LinkConfig {
 export const INFO_LINKS: LinkConfig[] = [
   {
     key: 'github',
-    url: 'https://github.com/colaBiliHelper/cola-be',
+    url: 'https://github.com/KolaBiliLabs/BiliBrowserExtension',
     text: '插件源码',
     title: '查看插件源码',
     icon: GithubIcon,
   },
   {
     key: 'client',
-    url: 'https://github.com/colaBiliHelper/cola-be',
+    url: 'https://github.com/KolaBiliLabs/BiliHelper',
     text: '客户端地址',
     title: '查看客户端地址',
     icon: CirclePercentIcon,

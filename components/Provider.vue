@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { GlobalThemeOverrides } from 'naive-ui'
-import { lightTheme, NConfigProvider, NMessageProvider, useMessage } from 'naive-ui'
+import { darkTheme, NConfigProvider, NMessageProvider, useMessage } from 'naive-ui'
 
 defineSlots<{
   default: () => void
@@ -29,7 +29,10 @@ const NaiveContentProvider = defineComponent({
 </script>
 
 <template>
-  <NConfigProvider :theme-overrides :theme="lightTheme">
+  <NConfigProvider
+    :theme-overrides
+    :theme="darkTheme"
+  >
     <NMessageProvider
       :max="1"
       closable
