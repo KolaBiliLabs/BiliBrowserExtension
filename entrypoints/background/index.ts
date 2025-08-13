@@ -85,21 +85,6 @@ export default defineBackground({
       console.log('后台脚本收到消息: 消息类型为=> ', type)
 
       switch (type) {
-        case MESSAGE_TYPES.SEND_PARAMS: {
-          const params = payload
-          console.log('后台脚本正在处理从 Popup 接收到的 URL 参数:', params)
-
-          if (socket && socket.connected) {
-            sendDataToElectron(MESSAGE_TYPES.SEND_TO_ELECTRON, params)
-            sendResponse({ status: 'success', message: '参数已发送到 Electron 服务器。' })
-          } else {
-            sendResponse({ status: 'error', message: 'Socket.IO 未连接，无法发送参数。' })
-          }
-
-          // 必须返回 true 来指示你将异步地调用 sendResponse
-          return true
-        }
-
         case MESSAGE_TYPES.SEND_UNIFIED_DATA: {
           const unifiedData: ElectronMessageData = payload
           console.log('后台脚本正在处理统一格式数据:', unifiedData)
@@ -129,34 +114,6 @@ export default defineBackground({
             })
           } else {
             sendResponse({ status: 'error', message: 'Socket.IO 未连接，无法发送统一格式数据。' })
-          }
-
-          return true
-        }
-
-        case MESSAGE_TYPES.VIDEO_INFO: {
-          const videoData = payload
-          console.log('后台脚本正在处理视频信息:', videoData)
-
-          if (socket && socket.connected) {
-            sendDataToElectron(MESSAGE_TYPES.VIDEO_INFO_TO_ELECTRON, videoData)
-            sendResponse({ status: 'success', message: '视频信息已发送到 Electron 服务器。' })
-          } else {
-            sendResponse({ status: 'error', message: 'Socket.IO 未连接，无法发送视频信息。' })
-          }
-
-          return true
-        }
-
-        case MESSAGE_TYPES.SONG_CONFIG: {
-          const songData = payload
-          console.log('后台脚本正在处理歌曲配置:', songData)
-
-          if (socket && socket.connected) {
-            sendDataToElectron(MESSAGE_TYPES.SONG_CONFIG_TO_ELECTRON, songData)
-            sendResponse({ status: 'success', message: '歌曲配置已发送到 Electron 服务器。' })
-          } else {
-            sendResponse({ status: 'error', message: 'Socket.IO 未连接，无法发送歌曲配置。' })
           }
 
           return true

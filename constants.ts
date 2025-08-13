@@ -19,18 +19,12 @@ export const DEFAULT_VIDEO_SELECTOR = VIDEO_SELECTORS.BILIBILI
 // 消息类型常量
 export const MESSAGE_TYPES = {
   // 发送到后台的消息类型
-  SEND_PARAMS: 'sendParamsToBackground',
-  VIDEO_INFO: 'videoInfo',
-  SONG_CONFIG: 'songConfig',
   SEND_UNIFIED_DATA: 'sendUnifiedDataToElectron',
   CHECK_CONNECTION: 'checkConnection',
-  
+
   // 发送到 Electron 的事件类型
-  SEND_TO_ELECTRON: 'sendDataToElectron',
   UNIFIED_DATA_TO_ELECTRON: 'unifiedDataToElectron',
-  VIDEO_INFO_TO_ELECTRON: 'videoInfoToElectron',
-  SONG_CONFIG_TO_ELECTRON: 'songConfigToElectron',
-  
+
   // Socket.IO 连接事件
   BROWSER_PLUGIN_CONNECTED: 'browserPluginConnected',
   DATA_FROM_ELECTRON: 'dataFromElectron',

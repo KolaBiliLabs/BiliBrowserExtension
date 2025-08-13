@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { CogIcon, XIcon } from 'lucide-vue-next'
 import { NButton, NButtonGroup, NIcon } from 'naive-ui'
-import { DEFAULT_VIDEO_SELECTOR, MESSAGE_TYPES } from '@/constants'
+import { DEFAULT_VIDEO_SELECTOR } from '@/constants'
 import {
   getVideoInfo,
   parseBilibiliVideoUrl,
-  sendEventToBackground,
   sendUnifiedDataToElectron,
   showWarning,
 } from '@/utils'
@@ -74,8 +73,8 @@ async function handleProcessParams() {
         }
       })
     } else {
-      // 如果没有视频信息，仍然发送参数
-      sendEventToBackground(MESSAGE_TYPES.SEND_PARAMS, urlParams.value)
+      // 如果没有视频信息, 则提示用户
+      showWarning('未找到视频元素，请确保在视频播放页面')
     }
   })
 }
