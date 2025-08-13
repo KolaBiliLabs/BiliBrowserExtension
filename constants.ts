@@ -9,6 +9,19 @@ export interface LinkConfig {
   icon: any
 }
 
+// 视频选择器常量
+export const VIDEO_SELECTORS = {
+  // Bilibili 视频选择器
+  BILIBILI: '.bpx-player-video-wrap video',
+  // 通用视频选择器
+  GENERIC: 'video',
+  // YouTube 视频选择器（备用）
+  YOUTUBE: 'video',
+} as const
+
+// 默认视频选择器
+export const DEFAULT_VIDEO_SELECTOR = VIDEO_SELECTORS.BILIBILI
+
 // 链接配置
 export const INFO_LINKS: LinkConfig[] = [
   {

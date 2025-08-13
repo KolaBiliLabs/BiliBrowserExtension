@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { NInput, NSlider } from 'naive-ui'
+import { DEFAULT_VIDEO_SELECTOR } from '@/constants'
 import { setVideoTime, getVideoCurrentTime, getVideoInfo } from '@/utils'
 import { onMounted } from 'vue'
 
@@ -33,7 +34,7 @@ const formData = computed({
 })
 
 // 视频选择器
-const videoSelector = computed(() => props.videoSelector || '.bpx-player-video-wrap video')
+const videoSelector = computed(() => props.videoSelector || DEFAULT_VIDEO_SELECTOR)
 
 // 是否正在拖动滑块
 const isDragging = ref(false)

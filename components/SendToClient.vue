@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { CogIcon, XIcon } from 'lucide-vue-next'
 import { NButton, NButtonGroup, NIcon } from 'naive-ui'
+import { DEFAULT_VIDEO_SELECTOR } from '@/constants'
 import {
   getVideoInfo,
   parseBilibiliVideoUrl,
@@ -63,9 +64,8 @@ function sendWithConf() {
   console.log('sendWithConf')
 
   // 获取视频信息
-  // bili的 视频元素选择器为 .bpx-player-video-wrap video
-  // ? [ ] 未经过多个页面的验证 存疑
-  getVideoInfo('.bpx-player-video-wrap video', (videoInfo) => {
+  // 使用常量中的视频选择器
+  getVideoInfo(DEFAULT_VIDEO_SELECTOR, (videoInfo) => {
     if (videoInfo) {
       console.log('获取到的视频信息:', videoInfo)
       handleVideoInfo(videoInfo)
@@ -218,7 +218,7 @@ function toggleExpand() {
 
       <SongConfigForm
         v-model="formData"
-        video-selector=".bpx-player-video-wrap video"
+        :video-selector="DEFAULT_VIDEO_SELECTOR"
       />
     </div>
   </Transition>
