@@ -65,7 +65,7 @@ export interface ElectronMessageData {
   }
 
   // 自定义歌曲信息
-  song: {
+  song?: {
     name: string
     startTime: number
     endTime: number

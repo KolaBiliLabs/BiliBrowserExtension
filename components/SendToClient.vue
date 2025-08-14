@@ -46,8 +46,13 @@ function handleParseUrl() {
   return true
 }
 
-// 处理参数发送
-async function handleProcessParams() {
+// 主要发送函数
+function send() {
+  const parseResult = handleParseUrl()
+  if (!parseResult) {
+    return
+  }
+
   if (!Object.keys(urlParams.value).length) {
     showWarning('没有可处理的参数。请先解析URL。')
     return
@@ -60,11 +65,7 @@ async function handleProcessParams() {
       sendUnifiedDataToElectron(
         urlParams.value,
         videoInfo,
-        {
-          name: formData.value.songName,
-          startTime: formData.value.startTime,
-          endTime: formData.value.endTime,
-        },
+        undefined,
         {
           action: 'sendParams',
           source: 'popup',
@@ -81,14 +82,6 @@ async function handleProcessParams() {
       showWarning('未找到视频元素，请确保在视频播放页面')
     }
   })
-}
-
-// 主要发送函数
-function send() {
-  const parseResult = handleParseUrl()
-  if (parseResult) {
-    handleProcessParams()
-  }
 }
 
 function sendWithConf() {

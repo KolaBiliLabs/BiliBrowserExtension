@@ -387,7 +387,7 @@ export function getVideoCurrentTime(
 export function buildElectronMessageData(
   params: Record<string, any>,
   videoInfo: any,
-  songInfo: {
+  songInfo?: {
     name: string
     startTime: number
     endTime: number
@@ -420,11 +420,13 @@ export function buildElectronMessageData(
     },
 
     // 自定义歌曲信息
-    song: {
-      name: songInfo.name || '',
-      startTime: songInfo.startTime || 0,
-      endTime: songInfo.endTime || 0,
-    },
+    song: songInfo
+      ? {
+          name: songInfo.name || '',
+          startTime: songInfo.startTime || 0,
+          endTime: songInfo.endTime || 0,
+        }
+      : undefined,
 
     // 扩展信息
     metadata: metadata || {},
@@ -437,7 +439,7 @@ export function buildElectronMessageData(
 export async function sendUnifiedDataToElectron(
   params: Record<string, any>,
   videoInfo: any,
-  songInfo: {
+  songInfo?: {
     name: string
     startTime: number
     endTime: number
