@@ -42,6 +42,7 @@ function handleParseUrl() {
   }
 
   urlParams.value = params
+  console.log('urlPrams =>', urlParams.value, params)
   return true
 }
 
@@ -114,6 +115,8 @@ function handleVideoInfo(videoInfo: any) {
     formData.value.endTime = Math.floor(videoInfo.duration)
   }
 
+  handleParseUrl()
+
   // 使用统一的数据格式发送
   sendUnifiedDataToElectron(
     urlParams.value,
@@ -141,13 +144,7 @@ function handleExpand() {
   console.log('展开表单配置')
   setExpanded(true)
 
-  // 展开时的处理逻辑
-  // 1. 解析当前 URL 参数
   handleParseUrl()
-
-  // 2. 可以在这里添加其他展开时的初始化逻辑
-  // 例如：从本地存储加载上次的配置
-  // 例如：获取视频信息并预填充表单
 }
 
 // 关闭表单处理函数
@@ -155,14 +152,7 @@ function handleCollapse() {
   console.log('关闭表单配置')
   setExpanded(false)
 
-  // 关闭时的处理逻辑
-  // 1. 保存当前配置到本地存储
   saveFormData()
-
-  // 2. 清理表单数据（可选）
-  // clearFormData()
-
-  // 3. 可以在这里添加其他关闭时的清理逻辑
 }
 
 // 保存表单数据到本地存储
