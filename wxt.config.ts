@@ -10,7 +10,7 @@ export default defineConfig({
       tailwindcss(),
     ],
   }),
-  outDirTemplate: '{{browser}}-mv{{manifestVersion}}',
+  outDirTemplate: 'Kola-{{browser}}-{{manifestVersion}}',
   outDir: 'dist',
   manifest: {
     permissions: [
