@@ -57,11 +57,9 @@ function copyCurrentUrl() {
     </div>
 
     <!-- 按钮组 -->
-    <div class="space-y-3">
+    <div class="flex-center gap-2">
       <NButton
         type="primary"
-        size="large"
-        class="w-full glass-effect bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
         @click="goToBilibili"
       >
         前往 Bilibili
@@ -69,8 +67,6 @@ function copyCurrentUrl() {
 
       <NButton
         type="default"
-        size="large"
-        class="w-full glass-effect"
         @click="copyCurrentUrl"
       >
         复制页面链接

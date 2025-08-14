@@ -36,6 +36,9 @@ onMounted(getUrl)
   <Provider>
     <NCard
       :segmented="{ content: true, footer: 'soft' }"
+      :footer-style="{
+        padding: '8px',
+      }"
       title="Kola 插件"
       class="w-full rounded-none glass-effect"
       size="small"
@@ -59,16 +62,16 @@ onMounted(getUrl)
             页面类型: {{ isBilibiliVideo ? 'Bilibili 视频页面' : '非 Bilibili 视频页面' }}
           </span>
 
-          <Transition mode="out-in" name="fade">
+          <Transition v-if="isConnected" mode="out-in" name="fade">
             <!-- 已连接且是 Bilibili 视频页面 -->
-            <SendToClient v-if="isConnected && isBilibiliVideo" :url="currentUrl" />
+            <SendToClient v-if="isBilibiliVideo" :url="currentUrl" />
 
             <!-- 已连接但不是 Bilibili 视频页面 -->
-            <NonBilibiliView v-else-if="isConnected && !isBilibiliVideo" :url="currentUrl" />
-
-            <!-- 未连接 -->
-            <UnlinkView v-else />
+            <NonBilibiliView v-else :url="currentUrl" />
           </Transition>
+
+          <!-- 未连接 -->
+          <UnlinkView v-else />
         </div>
       </template>
 
