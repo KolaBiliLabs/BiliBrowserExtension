@@ -62,8 +62,11 @@ export function isBilibiliVideoPage(url: string): boolean {
       return false
     }
 
-    // 检查是否包含视频标识
-    const bvId = getBvId(url)
+    // 检查路径是否包含视频标识
+    const pathname = urlObj.pathname
+    const bvId = pathname.split('/').at(-2)
+
+    console.log('🚀 ~ isBilibiliVideoPage ~ bvId:', bvId)
 
     // 检查是否为 BV 开头的视频 ID
     return !!(bvId && bvId.toLowerCase().startsWith('bv'))
@@ -89,7 +92,7 @@ export function parseBilibiliVideoUrl(url: string): Record<string, string> | nul
     })
 
     // 解析 BV ID
-    const bvId = getBvId(url)
+    const bvId = urlObj.pathname.split('/').at(-2)
     if (!bvId || !bvId.toLowerCase().startsWith('bv')) {
       return null
     }
@@ -128,22 +131,6 @@ export function getPageTypeDescription(url: string): string {
     console.error(error)
     return '无效页面'
   }
-}
-
-/**
- * 获取 Bilibili 视频 ID
- * @param url 视频 URL
- * @returns Bilibili 视频 ID
- */
-export function getBvId(url: string) {
-  // 正则表达式匹配 "BV" 后紧跟的10位字母或数字
-  const regex = /BV[a-zA-Z0-9]{10}/
-  const match = url.match(regex)
-
-  if (match) {
-    return match[0] // match[0] 包含了匹配到的完整字符串
-  }
-  return null // 如果没有找到匹配项，则返回 null
 }
 
 // ==================== 页面类型信息工具函数 ====================
@@ -239,7 +226,7 @@ export function formatLinkText(text: string, maxLength: number = 20): string {
  * @param cssSelector 视频元素选择器，默认为 'video'
  * @param callback 回调函数，接收视频信息
  */
-export function getVideoInfo(cssSelector: string = 'video', callback: (videoInfo: any) => void): void {
+export function getVideoInfo(cssSelector: string = 'video', callback: (videoInfo: ElectronMessageData['video'] | null) => void): void {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     if (!tabs[0] || !tabs[0].id) {
       console.error('无法获取当前标签页')
@@ -281,7 +268,7 @@ export function getVideoInfo(cssSelector: string = 'video', callback: (videoInfo
       }
 
       if (results && results[0]) {
-        callback(results[0].result)
+        callback(results[0].result as ElectronMessageData['video'] | null)
       } else {
         callback(null)
       }
@@ -387,7 +374,7 @@ export function getVideoCurrentTime(
 export function buildElectronMessageData(
   params: Record<string, any>,
   videoInfo: any,
-  songInfo?: {
+  songInfo: {
     name: string
     startTime: number
     endTime: number
@@ -420,13 +407,11 @@ export function buildElectronMessageData(
     },
 
     // 自定义歌曲信息
-    song: songInfo
-      ? {
-          name: songInfo.name || '',
-          startTime: songInfo.startTime || 0,
-          endTime: songInfo.endTime || 0,
-        }
-      : undefined,
+    song: {
+      name: songInfo.name || '',
+      startTime: songInfo.startTime || 0,
+      endTime: songInfo.endTime || 0,
+    },
 
     // 扩展信息
     metadata: metadata || {},
@@ -439,7 +424,7 @@ export function buildElectronMessageData(
 export async function sendUnifiedDataToElectron(
   params: Record<string, any>,
   videoInfo: any,
-  songInfo?: {
+  songInfo: {
     name: string
     startTime: number
     endTime: number

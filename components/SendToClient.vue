@@ -3,8 +3,8 @@ import { CogIcon, XIcon } from 'lucide-vue-next'
 import { NButton, NButtonGroup, NIcon } from 'naive-ui'
 import { DEFAULT_VIDEO_SELECTOR } from '@/constants'
 import { useExpandedState } from '@/hooks/useExpandedState'
+import { useVideoInfo } from '@/hooks/useVideoInfo'
 import {
-  getVideoInfo,
   parseBilibiliVideoUrl,
   sendUnifiedDataToElectron,
   showWarning,
@@ -15,21 +15,27 @@ const { url } = defineProps<{
   url: string
 }>()
 
-const urlParams = ref<Record<string, string>>({})
-
-// 使用展开状态 hook（带防抖）
-const { isExpanded, setExpanded, isTransitioning } = useExpandedState('sendToClientExpanded', false, 300)
-
 // 表单数据
 const formData = ref({
   songName: '',
   startTime: 0,
   endTime: 10,
+  maxDuration: 10,
 })
+
+// 使用展开状态 hook（带防抖）
+const { isExpanded, setExpanded, isTransitioning } = useExpandedState('sendToClientExpanded', false, 300)
+// 视频信息
+const { videoInfoCache, isVideoInfoLoading, clearVideoInfoCache } = useVideoInfo((videoInfo) => {
+  if (videoInfo) {
+    formData.value.endTime = formData.value.maxDuration = Math.floor(videoInfo.duration)
+  }
+})
+
+const urlParams = ref<Record<string, string>>({})
 
 // 解析 URL 参数
 function handleParseUrl() {
-  console.log('url => ', url)
   if (!url) {
     showWarning('请等待URL加载或确保在有效页面。')
     return false
@@ -47,7 +53,7 @@ function handleParseUrl() {
 }
 
 // 主要发送函数
-function send() {
+async function send() {
   const parseResult = handleParseUrl()
   if (!parseResult) {
     return
@@ -58,62 +64,53 @@ function send() {
     return
   }
 
-  // 获取视频信息
-  getVideoInfo(DEFAULT_VIDEO_SELECTOR, (videoInfo) => {
-    if (videoInfo) {
-      // 使用统一的数据格式发送
-      sendUnifiedDataToElectron(
-        urlParams.value,
-        videoInfo,
-        undefined,
-        {
-          action: 'sendParams',
-          source: 'popup',
-        },
-      ).then((result) => {
-        if (result.success) {
-          console.log('统一数据发送成功:', result.data)
-        } else {
-          console.error('统一数据发送失败:', result.error)
-        }
-      })
-    } else {
-      // 如果没有视频信息, 则提示用户
-      showWarning('未找到视频元素，请确保在视频播放页面')
-    }
-  })
+  if (!videoInfoCache.value) {
+    showWarning('未找到视频元素，请确保在视频播放页面')
+    return
+  }
+
+  // 使用统一的数据格式发送
+  const result = await sendUnifiedDataToElectron(
+    urlParams.value,
+    videoInfoCache.value,
+    {
+      name: formData.value.songName,
+      startTime: formData.value.startTime,
+      endTime: formData.value.endTime,
+    },
+    {
+      action: 'sendParams',
+      source: 'popup',
+    },
+  )
+
+  if (result.success) {
+    console.log('统一数据发送成功:', result.data)
+  } else {
+    console.error('统一数据发送失败:', result.error)
+  }
 }
 
-function sendWithConf() {
+async function sendWithConf() {
   console.log('sendWithConf')
+  if (!videoInfoCache.value) {
+    showWarning('未找到视频元素，请确保在视频播放页面')
+    return
+  }
 
-  // 获取视频信息
-  // 使用常量中的视频选择器
-  getVideoInfo(DEFAULT_VIDEO_SELECTOR, (videoInfo) => {
-    if (videoInfo) {
-      console.log('获取到的视频信息:', videoInfo)
-      handleVideoInfo(videoInfo)
-    } else {
-      showWarning('未找到视频元素，请确保在视频播放页面')
-    }
-  })
-}
-
-// 处理获取到的视频信息
-function handleVideoInfo(videoInfo: any) {
-  console.log('处理视频信息:', videoInfo)
+  console.log('处理视频信息:', videoInfoCache.value)
 
   // 可以根据视频信息更新表单数据
-  if (videoInfo.duration) {
-    formData.value.endTime = Math.floor(videoInfo.duration)
+  if (videoInfoCache.value.duration) {
+    formData.value.endTime = Math.floor(videoInfoCache.value.duration)
   }
 
   handleParseUrl()
 
   // 使用统一的数据格式发送
-  sendUnifiedDataToElectron(
+  const result = await sendUnifiedDataToElectron(
     urlParams.value,
-    videoInfo,
+    videoInfoCache.value,
     {
       name: formData.value.songName,
       startTime: formData.value.startTime,
@@ -123,13 +120,13 @@ function handleVideoInfo(videoInfo: any) {
       action: 'videoInfo',
       source: 'popup',
     },
-  ).then((result) => {
-    if (result.success) {
-      console.log('视频信息统一数据发送成功:', result.data)
-    } else {
-      console.error('视频信息统一数据发送失败:', result.error)
-    }
-  })
+  )
+
+  if (result.success) {
+    console.log('视频信息统一数据发送成功:', result.data)
+  } else {
+    console.error('视频信息统一数据发送失败:', result.error)
+  }
 }
 
 // 展开表单处理函数
@@ -137,6 +134,8 @@ function handleExpand() {
   console.log('展开表单配置')
   setExpanded(true)
 
+  // 清除视频信息缓存，确保获取最新信息
+  clearVideoInfoCache()
   handleParseUrl()
 }
 
@@ -187,6 +186,7 @@ function toggleExpand() {
     <NButtonGroup v-if="!isExpanded" class="py-8" size="large">
       <NButton
         type="primary"
+        :loading="isVideoInfoLoading"
         @click="send"
       >
         添加到播放列表
@@ -203,12 +203,13 @@ function toggleExpand() {
       </NButton>
     </NButtonGroup>
 
-    <div v-else class="flex-1 flex-col-center form-container-glass p-4 gap-4">
+    <div v-else class="flex-1 flex-col-center bg-black/10 backdrop-blur-lg rounded-lg border border-white/10 p-4 gap-4">
       <header class="flex-between w-full">
         <!-- 按钮 -->
         <NButton
           type="primary"
           size="small"
+          :loading="isVideoInfoLoading"
           @click="sendWithConf"
         >
           添加到播放列表
@@ -226,47 +227,8 @@ function toggleExpand() {
       <SongConfigForm
         v-model="formData"
         :video-selector="DEFAULT_VIDEO_SELECTOR"
+        :loading="isVideoInfoLoading"
       />
     </div>
   </Transition>
 </template>
-
-<style scoped>
-/* 表单容器样式 */
-.form-container-glass {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 16px;
-  /* box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); */
-}
-
-/* 展开按钮的条纹扫过动画效果 */
-.expanded-button {
-  background: linear-gradient(45deg, #3b82f6, #1d4ed8) !important;
-  border: 1px solid #3b82f6 !important;
-  position: relative;
-  overflow: hidden;
-}
-
-.expanded-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  animation: stripe 2s infinite;
-}
-
-@keyframes stripe {
-  0% {
-    left: -100%;
-  }
-  100% {
-    left: 100%;
-  }
-}
-</style>

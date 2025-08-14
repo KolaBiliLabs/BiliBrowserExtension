@@ -9,12 +9,8 @@ interface FormData {
   songName: string
   startTime: number
   endTime: number
+  maxDuration: number
 }
-
-// 组件名称
-defineOptions({
-  name: 'song-config-form',
-})
 
 const formData = defineModel<FormData>({
   required: true,
@@ -23,13 +19,11 @@ const formData = defineModel<FormData>({
 // 定义 props
 const props = defineProps<{
   videoSelector?: string // 视频选择器
+  loading: boolean
 }>()
 
 // 视频选择器
 const videoSelector = computed(() => props.videoSelector || DEFAULT_VIDEO_SELECTOR)
-
-// 视频最大时长
-const maxDuration = ref(600)
 
 // 格式化时间显示
 function formatTime(seconds: number): string {
@@ -53,14 +47,8 @@ function setVideoTimeStamp(time: number) {
 function updateVideoDuration() {
   getVideoInfo(videoSelector.value, (videoInfo) => {
     if (videoInfo && videoInfo.duration) {
-      maxDuration.value = Math.ceil(videoInfo.duration)
-      formData.value.endTime = maxDuration.value
-      console.log('视频时长更新为:', maxDuration.value)
-
-      // 如果结束时间超过新的最大时长，则调整
-      if (formData.value.endTime > maxDuration.value) {
-        formData.value.endTime = maxDuration.value
-      }
+      formData.value.endTime = formData.value.maxDuration = Math.ceil(videoInfo.duration)
+      console.log('视频时长更新为:', formData.value.maxDuration)
     }
   })
 }
@@ -131,7 +119,7 @@ onMounted(() => {
         <NSlider
           :value="formData.startTime"
           :min="0"
-          :max="maxDuration"
+          :max="formData.maxDuration"
           :step="1"
           :tooltip="false"
           @update:value="onSliderUpdate($event, 'start')"
@@ -148,7 +136,7 @@ onMounted(() => {
         <NSlider
           :value="formData.endTime"
           :min="0"
-          :max="maxDuration"
+          :max="formData.maxDuration"
           :step="1"
           :tooltip="false"
           @update:value="onSliderUpdate($event, 'end')"
@@ -160,8 +148,8 @@ onMounted(() => {
         <div
           class="absolute h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-all duration-300"
           :style="{
-            left: `${(formData.startTime / maxDuration) * 100}%`,
-            width: `${((formData.endTime - formData.startTime) / maxDuration) * 100}%`,
+            left: `${(formData.startTime / formData.maxDuration) * 100}%`,
+            width: `${((formData.endTime - formData.startTime) / formData.maxDuration) * 100}%`,
           }"
         />
       </div>
@@ -178,60 +166,5 @@ onMounted(() => {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   padding: 8px;
-}
-
-/* 输入框样式 */
-:deep(.n-input) {
-  background: rgba(255, 255, 255, 0.1) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  border-radius: 8px !important;
-}
-
-:deep(.n-input:focus-within) {
-  border-color: #3b82f6 !important;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
-}
-
-:deep(.n-input__input) {
-  color: white !important;
-}
-
-:deep(.n-input__input::placeholder) {
-  color: rgba(255, 255, 255, 0.5) !important;
-}
-
-/* 滑块样式优化 */
-:deep(.n-slider) {
-  cursor: pointer;
-}
-
-:deep(.n-slider__rail) {
-  background: rgba(255, 255, 255, 0.2) !important;
-}
-
-:deep(.n-slider__fill) {
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6) !important;
-}
-
-:deep(.n-slider__thumb) {
-  background: #3b82f6 !important;
-  border: 2px solid white !important;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3) !important;
-  transition: all 0.2s ease !important;
-}
-
-:deep(.n-slider__thumb:hover) {
-  transform: scale(1.1) !important;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4) !important;
-}
-
-:deep(.n-slider__thumb:active) {
-  transform: scale(1.05) !important;
-}
-
-/* 拖动时的视觉反馈 */
-.slider-container-glass.dragging {
-  background: rgba(59, 130, 246, 0.1) !important;
-  border-color: rgba(59, 130, 246, 0.3) !important;
 }
 </style>

@@ -89,6 +89,13 @@ export default defineBackground({
           const unifiedData: ElectronMessageData = payload
           console.log('后台脚本正在处理统一格式数据:', unifiedData)
 
+          // 验证数据格式
+          if (!validateUnifiedData(unifiedData)) {
+            console.error('统一数据格式验证失败')
+            sendResponse({ status: 'error', message: '数据格式验证失败' })
+            return true
+          }
+
           // 记录详细日志
           logUnifiedData(unifiedData)
 
@@ -101,7 +108,7 @@ export default defineBackground({
               data: {
                 timestamp: unifiedData.timestamp,
                 bvId: unifiedData.params.bvId,
-                songName: unifiedData.song?.name,
+                songName: unifiedData.song.name,
                 action: unifiedData.metadata?.action,
               },
             })
@@ -149,6 +156,19 @@ export function sendDataToElectron(event: string, data: any) {
   }
 }
 
+// 验证统一数据格式的辅助函数
+function validateUnifiedData(data: any): data is ElectronMessageData {
+  return (
+    data
+    && typeof data.timestamp === 'number'
+    && data.source === 'browser-extension'
+    && typeof data.version === 'string'
+    && data.params
+    && data.video
+    && data.song
+  )
+}
+
 // 记录统一数据日志的辅助函数
 function logUnifiedData(data: ElectronMessageData) {
   console.log('=== 统一数据格式日志 ===')
@@ -156,8 +176,8 @@ function logUnifiedData(data: ElectronMessageData) {
   console.log('来源:', data.source)
   console.log('版本:', data.version)
   console.log('BV ID:', data.params.bvId)
-  console.log('歌曲名称:', data.song?.name)
-  console.log('时间范围:', `${data.song?.startTime}s - ${data.song?.endTime}s`)
+  console.log('歌曲名称:', data.song.name)
+  console.log('时间范围:', `${data.song.startTime}s - ${data.song.endTime}s`)
   console.log('视频标题:', data.video.title)
   console.log('视频时长:', data.video.duration)
   console.log('操作类型:', data.metadata?.action)
