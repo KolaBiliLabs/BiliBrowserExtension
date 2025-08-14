@@ -16,22 +16,14 @@ defineOptions({
   name: 'song-config-form',
 })
 
+const formData = defineModel<FormData>({
+  required: true,
+})
+
 // 定义 props
 const props = defineProps<{
-  modelValue: FormData
   videoSelector?: string // 视频选择器
 }>()
-
-// 定义 emits
-const emit = defineEmits<{
-  'update:modelValue': [value: FormData]
-}>()
-
-// 表单数据
-const formData = computed({
-  get: () => props.modelValue,
-  set: value => emit('update:modelValue', value),
-})
 
 // 视频选择器
 const videoSelector = computed(() => props.videoSelector || DEFAULT_VIDEO_SELECTOR)
@@ -62,6 +54,7 @@ function updateVideoDuration() {
   getVideoInfo(videoSelector.value, (videoInfo) => {
     if (videoInfo && videoInfo.duration) {
       maxDuration.value = Math.ceil(videoInfo.duration)
+      formData.value.endTime = maxDuration.value
       console.log('视频时长更新为:', maxDuration.value)
 
       // 如果结束时间超过新的最大时长，则调整

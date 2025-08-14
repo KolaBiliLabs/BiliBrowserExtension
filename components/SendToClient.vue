@@ -24,7 +24,7 @@ const { isExpanded, setExpanded, isTransitioning } = useExpandedState('sendToCli
 const formData = ref({
   songName: '',
   startTime: 0,
-  endTime: 600,
+  endTime: 10,
 })
 
 // 解析 URL 参数
