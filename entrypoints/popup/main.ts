@@ -1,6 +1,6 @@
-import { createApp } from 'vue';
-import App from './App.vue';
-import './style.css';
+import { createApp } from 'vue'
+import App from './App.vue'
+import './styles/main.css'
 
 function bootstrap() {
   const app = createApp(App)

@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { GlobalThemeOverrides, lightTheme, NConfigProvider, NMessageProvider, useMessage } from 'naive-ui';
+import type { GlobalThemeOverrides } from 'naive-ui'
+import { darkTheme, NConfigProvider, NMessageProvider, useMessage } from 'naive-ui'
+
+defineSlots<{
+  default: () => void
+}>()
 
 // 全局主题配置
 const themeOverrides: GlobalThemeOverrides = {
@@ -24,8 +29,15 @@ const NaiveContentProvider = defineComponent({
 </script>
 
 <template>
-  <NConfigProvider :theme-overrides :theme="lightTheme">
-    <NMessageProvider :max="1" closable :duration="1000" placement="bottom">
+  <NConfigProvider
+    :theme-overrides
+    :theme="darkTheme"
+  >
+    <NMessageProvider
+      :max="1"
+      closable
+      placement="bottom"
+    >
       <slot />
       <NaiveContentProvider />
     </NMessageProvider>

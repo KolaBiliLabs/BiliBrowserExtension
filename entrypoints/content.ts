@@ -1,7 +1,7 @@
 export default defineContentScript({
   matches: ['*://*.bilibili.com/*'],
   async main(ctx) {
-    console.log('Hello content.');
+    console.log('Hello content.')
     // 3. Define your UI
     const ui = await createShadowRootUi(ctx, {
       name: 'example-ui',
@@ -10,12 +10,12 @@ export default defineContentScript({
       onMount: (container) => {
         console.log(container)
       },
-      onRemove: (app) => {
+      onRemove: (_app) => {
       },
-    });
+    })
 
     // 4. Mount the UI
-    ui.mount();
+    ui.mount()
   },
 
-});
+})
